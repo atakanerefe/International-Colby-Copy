@@ -2,7 +2,8 @@ from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify
 from flask_login import LoginManager
 from flask_oauthlib.client import OAuth
 from models import db, User
-import requests
+# werkzeug need to be werkzeug==2.3.7 if getting url error
+# uninstall werkzeug and install werkzeug==2.3.7
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'devsecretkey207'
@@ -14,7 +15,7 @@ oauth = OAuth(app)
 
 google_client_id = 'REMOVED_CLIENT_ID'
 google_client_secret = 'REMOVED_CLIENT_SECRET'
-google_redirect_uri = 'http://127.0.0.1:5000/login/authorized'
+google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
 
 google = oauth.remote_app(
     'google',
@@ -34,7 +35,7 @@ google = oauth.remote_app(
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
-        return jsonify({'data': me.data})
+        return jsonify({'data': me.data}) # redirect to the main (task) page instead
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
 @app.route('/login')
