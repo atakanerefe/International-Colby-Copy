@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify
+from flask import Flask, Blueprint, redirect, render_template, url_for, session, request, jsonify
 from flask_login import LoginManager
 from flask_oauthlib.client import OAuth
 from models import db, User
@@ -34,7 +34,8 @@ google = oauth.remote_app(
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
-        return jsonify({'data': me.data})
+        return redirect(url_for('steps'))
+        # return jsonify({'data': me.data})
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
 @app.route('/login')
@@ -51,7 +52,7 @@ def authorized():
     me = google.get('userinfo')
     # Here, 'me.data' contains user information.
     # You can perform registration process using this information if needed.
-
+    
     return redirect(url_for('index'))
 
 @app.route('/logout')
@@ -62,6 +63,14 @@ def logout():
 @google.tokengetter
 def get_google_oauth_token():
     return session.get('google_token')
+
+# route for steps page
+@app.route('/steps')
+def steps():
+    step = request.args.get('step', default=1, type=int)
+    
+    return render_template('steps.html', active_step=step)
+
 
 if __name__ == '__main__':
     with app.app_context():
