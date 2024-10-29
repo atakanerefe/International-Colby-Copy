@@ -67,8 +67,6 @@ def get_google_oauth_token():
 def steps():
     
     step = request.args.get('step', default=1, type=int)
-    
-    # Render the template with the current active step
     return render_template('steps.html', active_step=step)
 
 
