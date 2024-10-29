@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify
+from flask import Flask, Blueprint, redirect, render_template, url_for, session, request, jsonify
 from flask_login import LoginManager
 from flask_oauthlib.client import OAuth
 from models import db, User
@@ -63,6 +63,13 @@ def logout():
 @google.tokengetter
 def get_google_oauth_token():
     return session.get('google_token')
+
+@app.route('/steps')
+def steps():
+    
+    step = request.args.get('step', default=1, type=int)
+    return render_template('steps.html', active_step=step)
+
 
 if __name__ == '__main__':
     with app.app_context():
