@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify
+from flask import Flask, Blueprint, redirect, render_template, url_for, session, request, jsonify
 from flask_login import LoginManager
 from flask_oauthlib.client import OAuth
 from models import db, User
@@ -63,11 +63,12 @@ def logout():
 def get_google_oauth_token():
     return session.get('google_token')
 
-# route for steps page
 @app.route('/steps')
 def steps():
+    
     step = request.args.get('step', default=1, type=int)
     
+    # Render the template with the current active step
     return render_template('steps.html', active_step=step)
 
 
