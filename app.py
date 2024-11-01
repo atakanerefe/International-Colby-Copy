@@ -55,7 +55,7 @@ def authorized():
     # Here, 'me.data' contains user information.
     # You can perform registration process using this information if needed.
 
-    return redirect(url_for('subTask'))
+    return redirect(url_for('subtask'))
 
 @app.route('/logout')
 def logout():
@@ -66,9 +66,9 @@ def logout():
 def get_google_oauth_token():
     return session.get('google_token')
 
-@app.route('/subTask')
-def subTasks():
-    return render_template('subTask.html')
+@app.route('/subtask')
+def subtask():
+    return render_template('subtask.html')
 
 @app.route('/steps')
 def steps():
