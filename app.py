@@ -2,25 +2,27 @@ from flask import Flask, Blueprint, redirect, render_template, url_for, session,
 from flask_login import LoginManager
 from flask_oauthlib.client import OAuth
 from models import db, User
+import os
+from dotenv import load_dotenv
 # werkzeug need to be werkzeug==2.3.7 if getting url error
 # uninstall werkzeug and install werkzeug==2.3.7
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'devsecretkey207'
+app.config['SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 oauth = OAuth(app)
 
-google_client_id = 'REMOVED_CLIENT_ID'
-google_client_secret = 'REMOVED_CLIENT_SECRET'
 google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
+
+load_dotenv()
 
 google = oauth.remote_app(
     'google',
-    consumer_key=google_client_id,
-    consumer_secret=google_client_secret,
+    consumer_key=os.environ.get('GOOGLE_CLIENT_ID'),
+    consumer_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
     request_token_params={
         'scope': 'email',
     },
@@ -35,7 +37,7 @@ google = oauth.remote_app(
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
-        return jsonify({'data': me.data}) # redirect to the main (task) page instead
+        return redirect(url_for('steps'))
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
 @app.route('/login')
@@ -58,7 +60,7 @@ def authorized():
 @app.route('/logout')
 def logout():
     session.pop('google_token', None)
-    return redirect(url_for('index'))\
+    return redirect(url_for('index'))
     
 @google.tokengetter
 def get_google_oauth_token():
