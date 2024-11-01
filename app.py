@@ -1,25 +1,28 @@
-from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify, render_template
+from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify, render_template, jsonify
 from flask_login import LoginManager
 from flask_oauthlib.client import OAuth
 from models import db, User
-import requests
+import os
+from dotenv import load_dotenv
+# werkzeug need to be werkzeug==2.3.7 if getting url error
+# uninstall werkzeug and install werkzeug==2.3.7
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'devsecretkey207'
+app.config['SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 oauth = OAuth(app)
 
-google_client_id = 'REMOVED_CLIENT_ID'
-google_client_secret = 'REMOVED_CLIENT_SECRET'
-google_redirect_uri = 'http://127.0.0.1:5000/login/authorized'
+google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
+
+load_dotenv()
 
 google = oauth.remote_app(
     'google',
-    consumer_key=google_client_id,
-    consumer_secret=google_client_secret,
+    consumer_key=os.environ.get('GOOGLE_CLIENT_ID'),
+    consumer_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
     request_token_params={
         'scope': 'email',
     },
@@ -64,8 +67,14 @@ def get_google_oauth_token():
     return session.get('google_token')
 
 @app.route('/subTask')
-def steps():
+def subTasks():
     return render_template('subTask.html')
+
+@app.route('/steps')
+def steps():
+    step = request.args.get('step', default=1, type=int)
+    return render_template('steps.html', active_step=step)
+
 
 if __name__ == '__main__':
     with app.app_context():
