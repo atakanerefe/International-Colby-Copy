@@ -37,7 +37,7 @@ google = oauth.remote_app(
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
-        return render_template('subTask.html')
+        return render_template('task.html')
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
 @app.route('/login')
@@ -65,6 +65,10 @@ def logout():
 @google.tokengetter
 def get_google_oauth_token():
     return session.get('google_token')
+
+@app.route('/task')
+def task():
+    return render_template('task.html')
 
 @app.route('/subtask')
 def subtask():
