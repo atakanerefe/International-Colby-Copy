@@ -16,7 +16,8 @@ db.init_app(app)
 
 oauth = OAuth(app)
 
-google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
+# google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
+google_redirect_uri = 'https://intapp-f95d32a0df1a.herokuapp.com/login/authorized'
 
 google = oauth.remote_app(
     'google',
