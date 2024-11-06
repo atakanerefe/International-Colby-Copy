@@ -6,18 +6,17 @@ import os
 from dotenv import load_dotenv
 # werkzeug need to be werkzeug==2.3.7 if getting url error
 # uninstall werkzeug and install werkzeug==2.3.7
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres", "postgresql", 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 oauth = OAuth(app)
 
 google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
-
-load_dotenv()
 
 google = oauth.remote_app(
     'google',
