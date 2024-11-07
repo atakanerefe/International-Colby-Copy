@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify, render_template, jsonify
-from flask_login import LoginManager
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_oauthlib.client import OAuth
 from models import db, User
 import os
@@ -31,10 +31,18 @@ google = oauth.remote_app(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
 )
 
+login_manager = LoginManager(app)
+login_manager.login_view = '/'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/')
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
+        loginUser(me.data)
         print(me.data)
         return render_template('task.html')
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
@@ -51,13 +59,26 @@ def authorized():
 
     session['google_token'] = (response['access_token'], '')
     me = google.get('userinfo')
+    loginUser(me.data)
     # Here, 'me.data' contains user information.
     # You can perform registration process using this information if needed.
 
     return redirect(url_for('task'))
 
+def loginUser(userinfo):
+    existing_user = User.query.filter_by(email=userinfo['email']).first()
+    if existing_user:
+      login_user(existing_user)
+    else:
+      new_user = User(email=userinfo['email'])
+      db.session.add(new_user)
+      db.session.commit()
+      login_user(new_user)
+
 @app.route('/logout')
+@login_required
 def logout():
+    logout_user()
     session.pop('google_token', None)
     return redirect(url_for('index'))
     
@@ -66,14 +87,17 @@ def get_google_oauth_token():
     return session.get('google_token')
 
 @app.route('/task')
+@login_required
 def task():
     return render_template('task.html')
 
 @app.route('/subtask')
+@login_required
 def subtask():
     return render_template('subtask.html')
 
 @app.route('/steps')
+@login_required
 def steps():
     step = request.args.get('step', default=1, type=int)
     return render_template('steps.html', active_step=step)
