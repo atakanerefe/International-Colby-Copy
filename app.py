@@ -16,16 +16,14 @@ db.init_app(app)
 
 oauth = OAuth(app)
 
-# google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
-google_redirect_uri = 'https://intapp-f95d32a0df1a.herokuapp.com/login/authorized'
+google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
+# google_redirect_uri = 'https://intapp-f95d32a0df1a.herokuapp.com/login/authorized'
 
 google = oauth.remote_app(
     'google',
     consumer_key=os.environ.get('GOOGLE_CLIENT_ID'),
     consumer_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
-    request_token_params={
-        'scope': 'email',
-    },
+    request_token_params={'scope': 'email',},
     base_url='https://www.googleapis.com/oauth2/v1/',
     request_token_url=None,
     access_token_method='POST',
@@ -37,6 +35,7 @@ google = oauth.remote_app(
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
+        print(me.data)
         return render_template('task.html')
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
@@ -55,7 +54,7 @@ def authorized():
     # Here, 'me.data' contains user information.
     # You can perform registration process using this information if needed.
 
-    return redirect(url_for('subtask'))
+    return redirect(url_for('task'))
 
 @app.route('/logout')
 def logout():
