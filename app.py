@@ -102,6 +102,10 @@ def steps():
     step = request.args.get('step', default=1, type=int)
     return render_template('steps.html', active_step=step)
 
+@app.route('/admin')
+@login_required
+def admin():
+    return render_template('admin_home.html')
 
 if __name__ == '__main__':
     with app.app_context():
