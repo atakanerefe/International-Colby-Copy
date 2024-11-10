@@ -1,7 +1,7 @@
 from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify, render_template, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_oauthlib.client import OAuth
-from models import db, User
+from models import Subtask, Task, db, User
 import os
 from dotenv import load_dotenv
 # werkzeug need to be werkzeug==2.3.7 if getting url error
@@ -107,7 +107,152 @@ def steps():
 def admin():
     return render_template('admin_home.html')
 
+# adding sample data for demo
+def add_sample_data():
+    
+    users_data = [
+        "student1@example.com",
+        "student2@example.com",
+        "student3@example.com",
+        "student4@example.com"
+    ]
+    
+    # adding users if they don't exist in db
+    for email in users_data:
+        existing_user = User.query.filter_by(email=email).first()
+        if not existing_user:
+            new_user = User(email=email)
+            db.session.add(new_user)
+            db.session.commit()
+
+    # assigning emails to users
+    user1 = User.query.filter_by(email="student1@example.com").first()
+    user2 = User.query.filter_by(email="student2@example.com").first()
+    user3 = User.query.filter_by(email="student3@example.com").first()
+    user4 = User.query.filter_by(email="student4@example.com").first()
+
+    # check if tasks already exist in db
+    task1 = Task.query.filter_by(title="First Year Check In", user_id=user1.id).first()
+    if not task1:
+        # if not, add them
+        task1 = Task(title="First Year Check In", content="First Year Check-In Task", progress=0, user_id=user1.id)
+        db.session.add(task1)
+
+    task2 = Task.query.filter_by(title="Social Security Number", user_id=user2.id).first()
+    if not task2:
+        task2 = Task(title="Social Security Number", content="SSN Task", progress=0, user_id=user2.id)
+        db.session.add(task2)
+
+    task3 = Task.query.filter_by(title="Employment: OPT/CPT", user_id=user3.id).first()
+    if not task3:
+        task3 = Task(title="Employment: OPT/CPT", content="OPT/CPT Task", progress=0, user_id=user3.id)
+        db.session.add(task3)
+
+    task4 = Task.query.filter_by(title="First Year Check In", user_id=user4.id).first()
+    if not task4:
+        task4 = Task(title="First Year Check In", content="First Year Check-In Task", progress=0, user_id=user4.id)
+        db.session.add(task4)
+
+    db.session.commit()
+
+    # check if subtasks already exist in db
+    # these are for task1
+    subtask1 = Subtask.query.filter_by(title="Complete registration", task_id=task1.id).first()
+    if not subtask1:
+        subtask1 = Subtask(title="Complete registration", content="Fill out the registration form", complete=True, task_id=task1.id)
+        db.session.add(subtask1)
+
+    subtask2 = Subtask.query.filter_by(title="Submit documents", task_id=task1.id).first()
+    if not subtask2:
+        subtask2 = Subtask(title="Submit documents", content="Upload required documents", complete=False, task_id=task1.id)
+        db.session.add(subtask2)
+
+    subtask3 = Subtask.query.filter_by(title="Payment", task_id=task1.id).first()
+    if not subtask3:
+        subtask3 = Subtask(title="Payment", content="Complete payment for the semester", complete=True, task_id=task1.id)
+        db.session.add(subtask3)
+
+    # subtasks for task2
+    subtask4 = Subtask.query.filter_by(title="Form submission", task_id=task2.id).first()
+    if not subtask4:
+        subtask4 = Subtask(title="Form submission", content="Submit form to the office", complete=False, task_id=task2.id)
+        db.session.add(subtask4)
+
+    subtask5 = Subtask.query.filter_by(title="Upload documents", task_id=task2.id).first()
+    if not subtask5:
+        subtask5 = Subtask(title="Upload documents", content="Upload proof of ID", complete=True, task_id=task2.id)
+        db.session.add(subtask5)
+
+    # subtasks for task3
+    subtask6 = Subtask.query.filter_by(title="Fill application", task_id=task3.id).first()
+    if not subtask6:
+        subtask6 = Subtask(title="Fill application", content="Complete the OPT application", complete=True, task_id=task3.id)
+        db.session.add(subtask6)
+
+    subtask7 = Subtask.query.filter_by(title="Submit proof", task_id=task3.id).first()
+    if not subtask7:
+        subtask7 = Subtask(title="Submit proof", content="Submit necessary documents", complete=True, task_id=task3.id)
+        db.session.add(subtask7)
+
+    # subtasks for task4
+    subtask8 = Subtask.query.filter_by(title="Complete registration", task_id=task4.id).first()
+    if not subtask8:
+        subtask8 = Subtask(title="Complete registration", content="Fill out the registration form", complete=False, task_id=task4.id)
+        db.session.add(subtask8)
+
+    subtask9 = Subtask.query.filter_by(title="Submit documents", task_id=task4.id).first()
+    if not subtask9:
+        subtask9 = Subtask(title="Submit documents", content="Upload required documents", complete=True, task_id=task4.id)
+        db.session.add(subtask9)
+
+    db.session.commit()
+
+@app.route('/get_students_by_task')
+def get_students_by_task():
+    task_name = request.args.get('task')
+
+    # getting tasks based on task name
+    task = Task.query.filter_by(title=task_name).first()
+
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+
+    # getting users
+    users = User.query.all()
+
+    students_data = []
+    seen_students = set()
+
+    for user in users:
+        # find tasks assigned to user
+        user_tasks = Task.query.filter_by(user_id=user.id, title=task_name).all()
+
+        for user_task in user_tasks:
+            # get all subtasks related to this task
+            subtasks = Subtask.query.filter_by(task_id=user_task.id).all()
+
+            total_subtasks = len(subtasks)
+            completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
+
+            # calculate progress as a percentage
+            progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
+
+            # check if the student has already been added
+            if user.email not in seen_students:
+                seen_students.add(user.email)
+                students_data.append({
+                    'email': user.email,
+                    'progress': {
+                        'completed': completed_subtasks,
+                        'total': total_subtasks,
+                        'percent': progress_percent
+                    }
+                })
+
+    return jsonify({'students': students_data})
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Create tables (if not created)
+        add_sample_data() # harcoding data for demo
     app.run(debug=True)
