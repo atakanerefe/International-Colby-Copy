@@ -39,9 +39,9 @@
                         Select Task
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" href="#">First Year Check In</a></li>
-                        <li><a class="dropdown-item" href="#">Social Security Number</a></li>
-                        <li><a class="dropdown-item" href="#">Employment: OPT/CPT</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="fetchStudents('First Year Check In')">First Year Check In</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="fetchStudents('Social Security Number')">Social Security Number</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="fetchStudents('Employment: OPT/CPT')">Employment: OPT/CPT</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#">Create New Task</a></li>
                     </ul>
@@ -65,6 +65,8 @@
             </div>
         </content>
 
+        <!-- student cards will be inserted in this container -->
+        <content class="container row mx-auto mt-4" id="studentCardsContainer">
         <!-- <content class="container row mx-auto mt-4">
             <form class="dropdown-menu p-4">
                 <div class="form-group">
@@ -84,13 +86,17 @@
                 <button type="submit" class="btn btn-primary">Sign in</button>
               </form>
         </content> -->
+        </content>
     </content>
-
-
-
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-  crossorigin="anonymous"></script>
-  
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous">
+    </script>
+
+    <!-- javaScript to fetch students and display them dynamically -->
+<script src="{{ url_for('static', filename='adminPageStudentProgress.js') }}"></script>
+
+
 </body>
+
+</html>
