@@ -43,7 +43,7 @@
                         <li><a class="dropdown-item" href="#" onclick="fetchStudents('Social Security Number')">Social Security Number</a></li>
                         <li><a class="dropdown-item" href="#" onclick="fetchStudents('Employment: OPT/CPT')">Employment: OPT/CPT</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Create New Task</a></li>
+                        <li><a class="dropdown-item" href="{{url_for ('addTask')}}">Create New Task</a></li>
                     </ul>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                         Task Editing
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" href="#">Create New Task</a></li>
+                        <li><a class="dropdown-item" href="{{url_for ('addTask')}}">Create New Task</a></li>
                         <li><a class="dropdown-item" href="#">Edit Existing Task</a></li>
                     </ul>
                 </div>
@@ -62,6 +62,7 @@
             <div class="m-auto col-lg-5">
                 <label for="exampleDropdownFormEmail1">Student Search</label>
                 <input type="email" class="form-control" id="exampleDropdownFormEmail1" placeholder="student name">
+                <button type="submit" class="btn btn-primary mt-2" onclick="fetchTasks(document.getElementById('exampleDropdownFormEmail1').value)">Search</button>
             </div>
         </content>
 

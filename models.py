@@ -6,6 +6,7 @@ db = SQLAlchemy()
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(80), unique=True, nullable=False)
+    name = db.Column(db.String(80), nullable=True)
     tasks = db.relationship('Task', backref='user') # this is the way to tie tables together
 
 class Task(db.Model):

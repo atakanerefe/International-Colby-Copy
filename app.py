@@ -16,8 +16,8 @@ db.init_app(app)
 
 oauth = OAuth(app)
 
-google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
-# google_redirect_uri = 'https://intapp-f95d32a0df1a.herokuapp.com/login/authorized'
+# google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
+google_redirect_uri = 'https://intapp-f95d32a0df1a.herokuapp.com/login/authorized'
 
 google = oauth.remote_app(
     'google',
@@ -42,7 +42,11 @@ def load_user(user_id):
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
-        loginUser(me.data)
+        # print(me.data)
+        # print(me.data['error']['status'])
+        if me.data['error']['status'] == 'UNAUTHENTICATED':
+            return redirect(url_for('logout'))
+        return loginUser(me.data)
         print(me.data)
         return render_template('task.html')
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
@@ -68,15 +72,24 @@ def authorized():
 def loginUser(userinfo):
     existing_user = User.query.filter_by(email=userinfo['email']).first()
     if existing_user:
+      # update to not double call database in the future
       login_user(existing_user)
     else:
-      new_user = User(email=userinfo['email'])
-      db.session.add(new_user)
+      existing_user = User(email=userinfo['email'])
+      db.session.add(existing_user)
       db.session.commit()
-      login_user(new_user)
+      login_user(existing_user)
+    # print(existing_user.name)
+    # if existing_user.name is None:
+    #     print('name is none')
+    #     return render_template('name_form.html')
+    return redirect(url_for('task'))
+
+@app.route('/finish-login')
+def finish_login():
+    return render_template('name_form.html')
 
 @app.route('/logout')
-@login_required
 def logout():
     logout_user()
     session.pop('google_token', None)
@@ -106,6 +119,11 @@ def steps():
 @login_required
 def admin():
     return render_template('admin_home.html')
+
+@app.route('/admin/addTask')
+@login_required
+def addTask():
+    return render_template('addTask.html')
 
 # adding sample data for demo
 def add_sample_data():
@@ -248,8 +266,44 @@ def get_students_by_task():
                         'percent': progress_percent
                     }
                 })
-
     return jsonify({'students': students_data})
+
+@app.route('/get_tasks_by_email')
+def get_tasks_by_email():
+
+    email = request.args.get('email')
+
+    # get user by email
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    # get tasks assigned to user
+    tasks = Task.query.filter_by(user_id=user.id).all()
+
+    tasks_data = []
+
+    for task in tasks:
+        # get all subtasks related to this task
+        subtasks = Subtask.query.filter_by(task_id=task.id).all()
+
+        total_subtasks = len(subtasks)
+        completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
+
+        # calculate progress as a percentage
+        progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
+
+        tasks_data.append({
+            'title': task.title,
+            'content': task.content,
+            'progress': {
+                'completed': completed_subtasks,
+                'total': total_subtasks,
+                'percent': progress_percent
+            }
+        })
+    return jsonify({'tasks': tasks_data})
 
 if __name__ == '__main__':
     with app.app_context():
