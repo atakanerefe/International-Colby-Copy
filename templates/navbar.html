@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <title>Colby International Office Form Helper</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark pb-4" style="background: #2463A1;">
+        <div class="container">
+            <a class="navbar-brand" href="{{url_for ('task')}}"><img src="../static/images/IntLogo.jpg" width=200 height=70 /></a>
+            <div class="nav-item">
+                <button class="btn">
+                    <i class="fa fa-sign-out" aria-hidden="true" style="color: white;"></i>
+                    <!--Don't use "i" tag for anything but Font-Awesome -Atakan -->
+                    <a style="color: white" href= "{{url_for ('logout')}}">Log Out</a>
+                </button>
+                <button class="btn nav-item">
+                    <i class="fa-solid fa-message " style="color: white;"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+  crossorigin="anonymous"></script>
+</body>
