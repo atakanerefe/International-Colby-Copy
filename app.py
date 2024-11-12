@@ -44,10 +44,10 @@ def index():
         me = google.get('userinfo')
         # print(me.data)
         # print(me.data['error']['status'])
-        if me.data['error']['status'] == 'UNAUTHENTICATED':
-            return redirect(url_for('logout'))
-        return loginUser(me.data)
-        print(me.data)
+        # if me.data['error']['status'] == 'UNAUTHENTICATED':
+        #     return redirect(url_for('logout'))
+        # return loginUser(me.data)
+        # print(me.data)
         return render_template('task.html')
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
@@ -70,15 +70,15 @@ def authorized():
     return redirect(url_for('task'))
 
 def loginUser(userinfo):
-    existing_user = User.query.filter_by(email=userinfo['email']).first()
-    if existing_user:
-      # update to not double call database in the future
-      login_user(existing_user)
-    else:
-      existing_user = User(email=userinfo['email'])
-      db.session.add(existing_user)
-      db.session.commit()
-      login_user(existing_user)
+    # existing_user = User.query.filter_by(email=userinfo['email']).first()
+    # if existing_user:
+    #   # update to not double call database in the future
+    #   login_user(existing_user)
+    # else:
+    existing_user = User(email=userinfo['email'])
+    db.session.add(existing_user)
+    db.session.commit()
+    login_user(existing_user)
     # print(existing_user.name)
     # if existing_user.name is None:
     #     print('name is none')
