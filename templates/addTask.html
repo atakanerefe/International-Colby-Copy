@@ -39,38 +39,38 @@
                   <form class="col-lg-5">
                     <div class="form-group fs-1 mb-4">
                       <label for="exampleFormControlInput1">Task Name:</label>
-                      <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Get SSN Number">
+                      <input type="text" class="form-control"  placeholder="Get SSN Number">
                       <label for="exampleFormControlInput1">Deadline:</label>
-                      <input type="date" class="form-control" id="exampleFormControlInput1" placeholder="Deadline">
+                      <input type="date" class="form-control"  placeholder="Deadline">
                     </div>
-                    <ol class="list-group list-group-flush">
+                    <ol class="list-group list-group-flush" id="subtask-list">
                       <li class="list-group-item"  style="background-color: #C7D9E0;">
                         <div class="form-group fs-3 mb-4">
-                          <label for="exampleFormControlInput1">Sub-Task Title:</label>
-                          <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Find an on campus job">
+                          <label>Sub-Task Title:</label>
+                          <input type="text" class="form-control" placeholder="Find an on campus job">
                         </div>
-                        <ul class="list-group list-group">
+
+                        <ul class="list-group step-list">
                           <li class="list-group-item">
                             <div class="form-group fs-5 mb-4">
-                              <label for="exampleFormControlInput1">Step Title:</label>
-                              <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Setup your workday account">
+                              <label>Step Title:</label>
+                              <input type="text" class="form-control" placeholder="Setup your workday account">
                             </div>
                             <div class="form-group mb-3">
-                              <label for="exampleFormControlTextarea1">Example textarea</label>
-                              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                              <label>Example textarea</label>
+                              <textarea class="form-control" rows="3"></textarea>
                             </div>
                           </li>
                         </ul>
-                        <button type="submit" class="btn btn-success">Add Step</button>
-                            <button type="submit" class="btn btn-danger disabled">Delete Step</button>
+                        <button type="button" class="btn btn-success add-step-btn mt-2" onclick="addStep(this.closest('.list-group-item').querySelector('.step-list'))">Add Step</button>
+                        <button type="button" class="btn btn-danger delete-step-btn mt-2" onclick="deleteStep(this.closest('.list-group-item').querySelector('.step-list'))">Delete Step</button>
+                        
                       </li>
                     </ol>
-                    <button type="submit" class="btn btn-success">Add Sub-Task</button>
-                    <button type="submit" class="btn btn-danger disabled">Delete Sub-Task</button>
-                    
+                    <button type="button" onclick="addSubtask()" class="btn btn-success mt-2">Add Sub-Task</button>
+                    <button type="button" onclick="deleteSubtask()" id="deleteSubtaskBtn" class="btn btn-danger mt-2">Delete Sub-Task</button>
                   </form>
                   <br>
-                  <!--<a href="facts.html" class="btn btn-dark" style="margin-left: 73%; background-color: #0A1626">What does this button do?</a>-->
           </div>
         </div>
       </section>
@@ -83,3 +83,63 @@
   integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
   crossorigin="anonymous"></script>
 </body>
+<script>
+  function addStep(stepList) {
+    const newStep = stepList.firstElementChild.cloneNode(true);
+
+    // Clear input fields in the new step
+    newStep.querySelectorAll("input, textarea").forEach(input => input.value = "");
+
+    stepList.appendChild(newStep);
+  }
+
+  function deleteStep(stepList) {
+    if (stepList.children.length > 1) {
+      stepList.removeChild(stepList.lastElementChild);
+    }
+  }
+
+  function addSubtask() {
+    const subtaskList = document.getElementById("subtask-list");
+    const newSubtask = subtaskList.firstElementChild.cloneNode(true);
+
+    // Clear input fields in the new subtask
+    newSubtask.querySelectorAll("input, textarea").forEach(input => input.value = "");
+
+    // Find and reset the step list within the new subtask
+    const stepList = newSubtask.querySelector(".step-list");
+    stepList.innerHTML = ""; // Clear all existing steps
+
+    // Create a fresh, blank step for the new subtask
+    const initialStep = document.createElement("li");
+    initialStep.className = "list-group-item";
+    initialStep.innerHTML = `
+      <div class="form-group fs-5 mb-4">
+        <label>Step Title:</label>
+        <input type="text" class="form-control" placeholder="Enter step title">
+      </div>
+      <div class="form-group mb-3">
+        <label>Example textarea</label>
+        <textarea class="form-control" rows="3"></textarea>
+      </div>
+    `;
+    stepList.appendChild(initialStep);
+
+    // Update buttons to call addStep and deleteStep with the specific step list
+    newSubtask.querySelector(".add-step-btn").onclick = () => addStep(stepList);
+    newSubtask.querySelector(".delete-step-btn").onclick = () => deleteStep(stepList);
+
+    // Append the new subtask to the list
+    subtaskList.appendChild(newSubtask);
+  }
+
+  function deleteSubtask() {
+    const subtaskList = document.getElementById("subtask-list");
+
+    if (subtaskList.children.length > 1) {
+      subtaskList.removeChild(subtaskList.lastElementChild);
+    }
+  }
+</script>
+
+</html>
