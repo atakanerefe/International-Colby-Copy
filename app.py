@@ -48,7 +48,8 @@ def index():
         #     return redirect(url_for('logout'))
         # return loginUser(me.data)
         # print(me.data)
-        return render_template('task.html')
+        print(current_user.get_id())
+        return render_template('task.html', tasks=run_get_tasks_by_email(me.data['email']))
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
 @app.route('/login')
@@ -70,14 +71,11 @@ def authorized():
     return redirect(url_for('task'))
 
 def loginUser(userinfo):
-    # existing_user = User.query.filter_by(email=userinfo['email']).first()
-    # if existing_user:
-    #   # update to not double call database in the future
-    #   login_user(existing_user)
-    # else:
-    existing_user = User(email=userinfo['email'])
-    db.session.add(existing_user)
-    db.session.commit()
+    existing_user = User.query.filter_by(email=userinfo['email']).first()
+    if not existing_user:
+      existing_user = User(email=userinfo['email'])
+      db.session.add(existing_user)
+      db.session.commit()
     login_user(existing_user)
     # print(existing_user.name)
     # if existing_user.name is None:
@@ -102,7 +100,7 @@ def get_google_oauth_token():
 @app.route('/task')
 @login_required
 def task():
-    return render_template('task.html')
+    return render_template('task.html', tasks=get_tasks_by_email(current_user.email))
 
 @app.route('/subtask')
 @login_required
@@ -128,7 +126,7 @@ def addTask():
 def add_sample_data():
     # Create or fetch users
     users_data = [
-        "student1@example.com",
+        "obraym25@colby.edu",
         "student2@example.com",
         "student3@example.com",
         "student4@example.com"
@@ -247,6 +245,50 @@ def get_students_by_task():
 
     return jsonify({'students': students_data})
 
+@app.route('/get_tasks_by_email')
+def get_tasks_by_email():
+
+    email = request.args.get('email')
+    return jsonify({'tasks': run_get_tasks_by_email(email, js_call=True)})
+
+def run_get_tasks_by_email(email, js_call=False):
+   # get user by email
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    # get progress intances for the user
+    progress = Progress.query.filter_by(user_id=user.id).all()
+
+    # get all unique tasks from task_id column in progress
+    task_ids = set(progress_entry.task_id for progress_entry in progress)
+
+    tasks_data = []
+
+    for task_id in task_ids:
+        
+        # get all subtasks in progress that have task_id
+        subtasks = [progress_entry for progress_entry in progress if progress_entry.task_id == task_id]
+        
+        # get number of subtasks that are complete from subtasks
+        completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
+
+        # calculate progress as a percentage
+        progress_percent = (completed_subtasks / len(subtasks)) * 100 if len(subtasks) > 0 else 0
+
+        task = Task.query.filter_by(id=task_id).first()
+
+        tasks_data.append({
+            'title': task.title,
+            'content': task.content,
+            'progress': {
+                'completed': completed_subtasks,
+                'total': len(subtasks),
+                'percent': progress_percent
+            }
+        })
+    return tasks_data
 
 if __name__ == '__main__':
     with app.app_context():

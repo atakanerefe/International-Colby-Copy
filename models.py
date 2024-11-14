@@ -15,6 +15,10 @@ class User(db.Model, UserMixin):
     tasks = db.relationship('Task', secondary=user_task_association_table, backref=db.backref('users', lazy='dynamic'))
     progress = db.relationship('Progress', backref='user')
 
+    # implement get_id method
+    def get_id(self):
+        return str(self.id)
+
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), nullable=False)
