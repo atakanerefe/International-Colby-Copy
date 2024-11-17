@@ -14,6 +14,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
+ADMIN_EMAILS = [
+    "mbeltguz@colby.edu",
+    "aemoreno@colby.edu",
+    "mfreese@colby.edu"
+]
+
 oauth = OAuth(app)
 
 # google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
@@ -81,6 +87,10 @@ def loginUser(userinfo):
     # if existing_user.name is None:
     #     print('name is none')
     #     return render_template('name_form.html')
+
+    if existing_user.email in ADMIN_EMAILS:
+        return redirect(url_for('admin')) 
+    
     return redirect(url_for('task'))
 
 @app.route('/finish-login')
