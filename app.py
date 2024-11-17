@@ -14,6 +14,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
+ADMIN_EMAILS = [
+    "mbeltguz@colby.edu",
+    "aemoreno@colby.edu",
+    "mfreese@colby.edu"
+]
+
 oauth = OAuth(app)
 
 # google_redirect_uri = 'http://127.0.0.1:5000/login/authorized' # change to your computer port
@@ -42,6 +48,7 @@ def load_user(user_id):
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
+        tasks = run_get_tasks_by_email(me.data['email'])
         # print(me.data)
         # print(me.data['error']['status'])
         # if me.data['error']['status'] == 'UNAUTHENTICATED':
@@ -49,7 +56,7 @@ def index():
         # return loginUser(me.data)
         # print(me.data)
         print(current_user.get_id())
-        return render_template('task.html', tasks=run_get_tasks_by_email(me.data['email']))
+        return render_template('task.html', tasks=tasks)
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
 @app.route('/login')
@@ -81,6 +88,10 @@ def loginUser(userinfo):
     # if existing_user.name is None:
     #     print('name is none')
     #     return render_template('name_form.html')
+
+    if existing_user.email in ADMIN_EMAILS:
+        return redirect(url_for('admin')) 
+    
     return redirect(url_for('task'))
 
 @app.route('/finish-login')
@@ -100,7 +111,8 @@ def get_google_oauth_token():
 @app.route('/task')
 @login_required
 def task():
-    return render_template('task.html', tasks=get_tasks_by_email(current_user.email))
+    tasks = run_get_tasks_by_email(current_user.email)
+    return render_template('task.html', tasks=tasks)
 
 @app.route('/subtask')
 @login_required
@@ -127,9 +139,9 @@ def add_sample_data():
     # Create or fetch users
     users_data = [
         "obraym25@colby.edu",
-        "student2@example.com",
-        "student3@example.com",
-        "student4@example.com"
+        "ybmold25@colby.edu",
+        "pyang25@colby.edu",
+        "aerefe26@colby.edu"
     ]
 
     # Add users if they don't already exist in the database
@@ -148,9 +160,9 @@ def add_sample_data():
     user_ids = [user.id for user in users]
 
     # Create a task (this task can be assigned to multiple users)
-    task = Task.query.filter_by(title="Sample Task").first()
+    task = Task.query.filter_by(title="First Year Check In").first()
     if not task:
-        task = Task(title="Sample Task", content="This is a sample task.")
+        task = Task(title="First Year Check In", content="This is a sample task.")
         db.session.add(task)
         db.session.commit()
 
@@ -166,11 +178,11 @@ def add_sample_data():
 
     # Create subtasks and assign them to the task
     subtasks_data = [
-        {"title": "Subtask 1", "content": "Description for Subtask 1"},
-        {"title": "Subtask 2", "content": "Description for Subtask 2"},
-        {"title": "Subtask 3", "content": "Description for Subtask 3"},
-        {"title": "Subtask 4", "content": "Description for Subtask 4"},
-        {"title": "Subtask 5", "content": "Description for Subtask 5"}
+        {"title": "I-20 Signature", "content": "Go to Aura Moreno's office in Cotter Union 239 to get your I-20 signed."},
+        {"title": "Get US Phone Number", "content": "Pick up a SIM card from the Pugh Center or use a free Google Voice number."},
+        {"title": "Bla Bla Bla 1", "content": "Bla Bla Bla 1"},
+        {"title": "Bla Bla Bla 2", "content": "Bla Bla Bla 2"},
+        {"title": "Bla Bla Bla 3", "content": "Bla Bla Bla 3"},
     ]
 
     subtasks = []
@@ -289,6 +301,50 @@ def run_get_tasks_by_email(email, js_call=False):
             }
         })
     return tasks_data
+
+
+@app.route('/admin/view_student_progress')
+@login_required
+def adminViewStudentProgress():
+    student_email = request.args.get('email')
+    task_name = request.args.get('task_name')
+
+    # Fetch the student and the task by name
+    student = User.query.filter_by(email=student_email).first()
+    if not student:
+        return "Student not found", 404
+
+    task = Task.query.filter_by(title=task_name).first()
+    if not task:
+        return "Task not found", 404
+
+    # Fetch all subtasks for the task
+    subtasks = Subtask.query.filter_by(task_id=task.id).all()
+
+    # Fetch progress for the student
+    progress_data = Progress.query.filter_by(user_id=student.id, task_id=task.id).all()
+
+    # Create a dictionary of progress for fast lookup
+    progress_dict = {progress.subtask_id: progress.complete for progress in progress_data}
+
+    subtasks_progress = []
+    for subtask in subtasks:
+        status = 'complete' if progress_dict.get(subtask.id, False) else 'incomplete'
+        subtasks_progress.append({
+            'subtask': subtask.title,
+            'description': subtask.content,  # Add description here
+            'status': status
+        })
+
+    # Calculate overall progress
+    completed_subtasks = sum(1 for subtask in subtasks_progress if subtask['status'] == 'complete')
+    total_subtasks = len(subtasks)
+    progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
+
+    progress_ratio = f"{completed_subtasks} / {total_subtasks}"  # Show progress as a ratio, e.g., "2 / 5"
+    
+    return render_template('adminViewStudentProgress.html', student=student, task=task, 
+                           subtasks=subtasks_progress, progress_percent=progress_percent, progress_ratio=progress_ratio)
 
 if __name__ == '__main__':
     with app.app_context():
