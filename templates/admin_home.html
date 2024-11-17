@@ -2,20 +2,36 @@
 <html lang="en">
 
 <head>
-    {% include 'bootstrapStarter.html' %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-    <!-- javaScript to fetch students and display them dynamically -->
-    <script src="{{ url_for('static', filename='adminPageStudentProgress.js') }}"></script>
-
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <title>Colby International Office Form Helper</title>
 </head>
 
 <body>
-        {% include 'navbar.html' %}
+    <nav class="navbar navbar-expand-lg navbar-dark pb-4" style="background: #2463A1;">
+        <div class="container">
+            <a class="navbar-brand" href="{{url_for ('task')}}"><img src="../static/images/IntLogo.jpg" width=200 height=70 /></a>
+            <button class="btn nav-item">
+                <i class="fa fa-sign-out" aria-hidden="true" style="color: white;">
+                <a style="color: white" href= "{{url_for ('logout')}}">Log Out</a>
+                </i>
+            </button>
+            <button class="btn nav-item">
+                <i class="fa-solid fa-message " style="color: white;"></i>
+            </button>
+        </div>
+    </nav>
 
     <content class="container row mx-auto mt-4">
-        <h5 class="text-center h2 pb-4">Welcome, Admin!</h5>
+        <h5 class="text-center h2 pb-4" id="welcome-message">Welcome, Admin!</h5>
         <content class="container row mx-auto mt-4">
             <div class="m-auto col-lg-1">
                 <div class="dropdown">
@@ -23,9 +39,8 @@
                         Select Task
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <!-- Change this to call fetchTasks with a sample email for each task -->
                         <li><a class="dropdown-item" href="#" onclick="fetchStudents('First Year Check In')">First Year Check In</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="fetchStudents('Social Security Number')">Social Security Number</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="fetchStudents('Employment: OPT/CPT')">Employment: OPT/CPT</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{url_for ('addTask')}}">Create New Task</a></li>
                     </ul>
@@ -50,28 +65,20 @@
             </div>
         </content>
 
-        <!-- student cards will be inserted in this container -->
         <content class="container row mx-auto mt-4" id="studentCardsContainer">
-        <!-- <content class="container row mx-auto mt-4">
-            <form class="dropdown-menu p-4">
-                <div class="form-group">
-                  <label for="exampleDropdownFormEmail2">Email address</label>
-                  <input type="email" class="form-control" id="exampleDropdownFormEmail2" placeholder="email@example.com">
-                </div>
-                <div class="form-group">
-                  <label for="exampleDropdownFormPassword2">Password</label>
-                  <input type="password" class="form-control" id="exampleDropdownFormPassword2" placeholder="Password">
-                </div>
-                <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="dropdownCheck2">
-                  <label class="form-check-label" for="dropdownCheck2">
-                    Remember me
-                  </label>
-                </div>
-                <button type="submit" class="btn btn-primary">Sign in</button>
-              </form>
-        </content> -->
+            <!-- Student progress cards will be dynamically added here -->
         </content>
+        
     </content>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous">
+    </script>
+
+    <!-- javaScript to fetch students and display them dynamically -->
+    <script src="{{ url_for('static', filename='adminPageStudentProgress.js') }}"></script>
+
 </body>
+
 </html>

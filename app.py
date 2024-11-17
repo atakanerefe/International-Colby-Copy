@@ -1,7 +1,7 @@
 from flask import Flask, Blueprint, redirect, url_for, session, request, jsonify, render_template, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_oauthlib.client import OAuth
-from models import Subtask, Task, db, User
+from models import Progress, Subtask, Task, db, User, user_task_association_table
 import os
 from dotenv import load_dotenv
 # werkzeug need to be werkzeug==2.3.7 if getting url error
@@ -13,6 +13,12 @@ app.config['SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres", "postgresql", 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+
+ADMIN_EMAILS = [
+    "mbeltguz@colby.edu",
+    "aemoreno@colby.edu",
+    "mfreese@colby.edu"
+]
 
 oauth = OAuth(app)
 
@@ -42,13 +48,15 @@ def load_user(user_id):
 def index():
     if 'google_token' in session:
         me = google.get('userinfo')
+        tasks = run_get_tasks_by_email(me.data['email'])
         # print(me.data)
         # print(me.data['error']['status'])
         # if me.data['error']['status'] == 'UNAUTHENTICATED':
         #     return redirect(url_for('logout'))
         # return loginUser(me.data)
         # print(me.data)
-        return render_template('task.html')
+        print(current_user.get_id())
+        return render_template('task.html', tasks=tasks)
     return 'Hello! Log in with your Google account: <a href="/login">Log in</a>'
 
 @app.route('/login')
@@ -70,19 +78,20 @@ def authorized():
     return redirect(url_for('task'))
 
 def loginUser(userinfo):
-    # existing_user = User.query.filter_by(email=userinfo['email']).first()
-    # if existing_user:
-    #   # update to not double call database in the future
-    #   login_user(existing_user)
-    # else:
-    existing_user = User(email=userinfo['email'])
-    db.session.add(existing_user)
-    db.session.commit()
+    existing_user = User.query.filter_by(email=userinfo['email']).first()
+    if not existing_user:
+      existing_user = User(email=userinfo['email'])
+      db.session.add(existing_user)
+      db.session.commit()
     login_user(existing_user)
     # print(existing_user.name)
     # if existing_user.name is None:
     #     print('name is none')
     #     return render_template('name_form.html')
+
+    if existing_user.email in ADMIN_EMAILS:
+        return redirect(url_for('admin')) 
+    
     return redirect(url_for('task'))
 
 @app.route('/finish-login')
@@ -102,7 +111,8 @@ def get_google_oauth_token():
 @app.route('/task')
 @login_required
 def task():
-    return render_template('task.html')
+    tasks = run_get_tasks_by_email(current_user.email)
+    return render_template('task.html', tasks=tasks)
 
 @app.route('/subtask')
 @login_required
@@ -125,185 +135,216 @@ def admin():
 def addTask():
     return render_template('addTask.html')
 
-# adding sample data for demo
 def add_sample_data():
-    
+    # Create or fetch users
     users_data = [
-        "student1@example.com",
-        "student2@example.com",
-        "student3@example.com",
-        "student4@example.com"
+        "obraym25@colby.edu",
+        "ybmold25@colby.edu",
+        "pyang25@colby.edu",
+        "aerefe26@colby.edu"
     ]
-    
-    # adding users if they don't exist in db
+
+    # Add users if they don't already exist in the database
+    users = []
     for email in users_data:
         existing_user = User.query.filter_by(email=email).first()
         if not existing_user:
             new_user = User(email=email)
             db.session.add(new_user)
-            db.session.commit()
-
-    # assigning emails to users
-    user1 = User.query.filter_by(email="student1@example.com").first()
-    user2 = User.query.filter_by(email="student2@example.com").first()
-    user3 = User.query.filter_by(email="student3@example.com").first()
-    user4 = User.query.filter_by(email="student4@example.com").first()
-
-    # check if tasks already exist in db
-    task1 = Task.query.filter_by(title="First Year Check In", user_id=user1.id).first()
-    if not task1:
-        # if not, add them
-        task1 = Task(title="First Year Check In", content="First Year Check-In Task", progress=0, user_id=user1.id)
-        db.session.add(task1)
-
-    task2 = Task.query.filter_by(title="Social Security Number", user_id=user2.id).first()
-    if not task2:
-        task2 = Task(title="Social Security Number", content="SSN Task", progress=0, user_id=user2.id)
-        db.session.add(task2)
-
-    task3 = Task.query.filter_by(title="Employment: OPT/CPT", user_id=user3.id).first()
-    if not task3:
-        task3 = Task(title="Employment: OPT/CPT", content="OPT/CPT Task", progress=0, user_id=user3.id)
-        db.session.add(task3)
-
-    task4 = Task.query.filter_by(title="First Year Check In", user_id=user4.id).first()
-    if not task4:
-        task4 = Task(title="First Year Check In", content="First Year Check-In Task", progress=0, user_id=user4.id)
-        db.session.add(task4)
-
+            users.append(new_user)
+        else:
+            users.append(existing_user)
     db.session.commit()
 
-    # check if subtasks already exist in db
-    # these are for task1
-    subtask1 = Subtask.query.filter_by(title="Complete registration", task_id=task1.id).first()
-    if not subtask1:
-        subtask1 = Subtask(title="Complete registration", content="Fill out the registration form", complete=True, task_id=task1.id)
-        db.session.add(subtask1)
+    # Fetch the users dynamically
+    user_ids = [user.id for user in users]
 
-    subtask2 = Subtask.query.filter_by(title="Submit documents", task_id=task1.id).first()
-    if not subtask2:
-        subtask2 = Subtask(title="Submit documents", content="Upload required documents", complete=False, task_id=task1.id)
-        db.session.add(subtask2)
+    # Create a task (this task can be assigned to multiple users)
+    task = Task.query.filter_by(title="First Year Check In").first()
+    if not task:
+        task = Task(title="First Year Check In", content="This is a sample task.")
+        db.session.add(task)
+        db.session.commit()
 
-    subtask3 = Subtask.query.filter_by(title="Payment", task_id=task1.id).first()
-    if not subtask3:
-        subtask3 = Subtask(title="Payment", content="Complete payment for the semester", complete=True, task_id=task1.id)
-        db.session.add(subtask3)
+    # Check if the user-task association already exists before adding
+    existing_users_in_task = set(user.id for user in task.users)  # Set of user IDs already associated with this task
+    users_to_add = [user for user in users if user.id not in existing_users_in_task]
 
-    # subtasks for task2
-    subtask4 = Subtask.query.filter_by(title="Form submission", task_id=task2.id).first()
-    if not subtask4:
-        subtask4 = Subtask(title="Form submission", content="Submit form to the office", complete=False, task_id=task2.id)
-        db.session.add(subtask4)
+    if users_to_add:
+        # Add users who are not yet associated with the task
+        for user in users_to_add:
+            task.users.append(user)
+        db.session.commit()
 
-    subtask5 = Subtask.query.filter_by(title="Upload documents", task_id=task2.id).first()
-    if not subtask5:
-        subtask5 = Subtask(title="Upload documents", content="Upload proof of ID", complete=True, task_id=task2.id)
-        db.session.add(subtask5)
+    # Create subtasks and assign them to the task
+    subtasks_data = [
+        {"title": "I-20 Signature", "content": "Go to Aura Moreno's office in Cotter Union 239 to get your I-20 signed."},
+        {"title": "Get US Phone Number", "content": "Pick up a SIM card from the Pugh Center or use a free Google Voice number."},
+        {"title": "Bla Bla Bla 1", "content": "Bla Bla Bla 1"},
+        {"title": "Bla Bla Bla 2", "content": "Bla Bla Bla 2"},
+        {"title": "Bla Bla Bla 3", "content": "Bla Bla Bla 3"},
+    ]
 
-    # subtasks for task3
-    subtask6 = Subtask.query.filter_by(title="Fill application", task_id=task3.id).first()
-    if not subtask6:
-        subtask6 = Subtask(title="Fill application", content="Complete the OPT application", complete=True, task_id=task3.id)
-        db.session.add(subtask6)
-
-    subtask7 = Subtask.query.filter_by(title="Submit proof", task_id=task3.id).first()
-    if not subtask7:
-        subtask7 = Subtask(title="Submit proof", content="Submit necessary documents", complete=True, task_id=task3.id)
-        db.session.add(subtask7)
-
-    # subtasks for task4
-    subtask8 = Subtask.query.filter_by(title="Complete registration", task_id=task4.id).first()
-    if not subtask8:
-        subtask8 = Subtask(title="Complete registration", content="Fill out the registration form", complete=False, task_id=task4.id)
-        db.session.add(subtask8)
-
-    subtask9 = Subtask.query.filter_by(title="Submit documents", task_id=task4.id).first()
-    if not subtask9:
-        subtask9 = Subtask(title="Submit documents", content="Upload required documents", complete=True, task_id=task4.id)
-        db.session.add(subtask9)
-
+    subtasks = []
+    for subtask_data in subtasks_data:
+        subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
+        if not subtask:
+            subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], task_id=task.id)
+            db.session.add(subtask)
+            subtasks.append(subtask)
     db.session.commit()
+
+    # Track progress for each user on the same task
+    progress_data = [
+        {"user": users[0], "subtasks_completed": [1, 2, 3]},  # User 1 has completed subtasks 1, 2, 3
+        {"user": users[1], "subtasks_completed": [2, 4]},     # User 2 has completed subtasks 2, 4
+        {"user": users[2], "subtasks_completed": [3, 5]},     # User 3 has completed subtasks 3, 5
+        {"user": users[3], "subtasks_completed": [1, 4, 5]}    # User 4 has completed subtasks 1, 4, 5
+    ]
+
+    # For each user, create progress records for their respective subtasks
+    for progress_entry in progress_data:
+        user = progress_entry["user"]
+        for i, subtask in enumerate(subtasks):
+            progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first()
+            if not progress:
+                complete = True if (i + 1) in progress_entry["subtasks_completed"] else False
+                progress = Progress(complete=complete, user_id=user.id, subtask_id=subtask.id, task_id=task.id)
+                db.session.add(progress)
+    db.session.commit()
+
 
 @app.route('/get_students_by_task')
 def get_students_by_task():
     task_name = request.args.get('task')
 
-    # getting tasks based on task name
+    # Fetch the task by its title
     task = Task.query.filter_by(title=task_name).first()
 
     if not task:
         return jsonify({'error': 'Task not found'}), 404
 
-    # getting users
-    users = User.query.all()
+    # Fetch all users assigned to this task using the user_task_association_table
+    students = User.query.join(user_task_association_table).join(Task).filter(Task.id == task.id).all()
 
     students_data = []
-    seen_students = set()
 
-    for user in users:
-        # find tasks assigned to user
-        user_tasks = Task.query.filter_by(user_id=user.id, title=task_name).all()
-
-        for user_task in user_tasks:
-            # get all subtasks related to this task
-            subtasks = Subtask.query.filter_by(task_id=user_task.id).all()
-
-            total_subtasks = len(subtasks)
-            completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
-
-            # calculate progress as a percentage
-            progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
-
-            # check if the student has already been added
-            if user.email not in seen_students:
-                seen_students.add(user.email)
-                students_data.append({
-                    'email': user.email,
-                    'progress': {
-                        'completed': completed_subtasks,
-                        'total': total_subtasks,
-                        'percent': progress_percent
-                    }
-                })
-    return jsonify({'students': students_data})
-
-@app.route('/get_tasks_by_email')
-def get_tasks_by_email():
-
-    email = request.args.get('email')
-
-    # get user by email
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-
-    # get tasks assigned to user
-    tasks = Task.query.filter_by(user_id=user.id).all()
-
-    tasks_data = []
-
-    for task in tasks:
-        # get all subtasks related to this task
+    for student in students:
+        # Get all subtasks for this task
         subtasks = Subtask.query.filter_by(task_id=task.id).all()
 
         total_subtasks = len(subtasks)
-        completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
+        completed_subtasks = 0
 
-        # calculate progress as a percentage
+        # Calculate progress for each student on the subtasks
+        for subtask in subtasks:
+            # Fetch the progress for the student and subtask
+            progress = Progress.query.filter_by(user_id=student.id, subtask_id=subtask.id).first()
+            if progress and progress.complete:
+                completed_subtasks += 1
+
+        # Calculate the progress percentage
         progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
 
-        tasks_data.append({
-            'title': task.title,
-            'content': task.content,
+        students_data.append({
+            'email': student.email,
             'progress': {
                 'completed': completed_subtasks,
                 'total': total_subtasks,
                 'percent': progress_percent
             }
         })
-    return jsonify({'tasks': tasks_data})
+
+    return jsonify({'students': students_data})
+
+@app.route('/get_tasks_by_email')
+def get_tasks_by_email():
+
+    email = request.args.get('email')
+    return jsonify({'tasks': run_get_tasks_by_email(email, js_call=True)})
+
+def run_get_tasks_by_email(email, js_call=False):
+   # get user by email
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    # get progress intances for the user
+    progress = Progress.query.filter_by(user_id=user.id).all()
+
+    # get all unique tasks from task_id column in progress
+    task_ids = set(progress_entry.task_id for progress_entry in progress)
+
+    tasks_data = []
+
+    for task_id in task_ids:
+        
+        # get all subtasks in progress that have task_id
+        subtasks = [progress_entry for progress_entry in progress if progress_entry.task_id == task_id]
+        
+        # get number of subtasks that are complete from subtasks
+        completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
+
+        # calculate progress as a percentage
+        progress_percent = (completed_subtasks / len(subtasks)) * 100 if len(subtasks) > 0 else 0
+
+        task = Task.query.filter_by(id=task_id).first()
+
+        tasks_data.append({
+            'title': task.title,
+            'content': task.content,
+            'progress': {
+                'completed': completed_subtasks,
+                'total': len(subtasks),
+                'percent': progress_percent
+            }
+        })
+    return tasks_data
+
+
+@app.route('/admin/view_student_progress')
+@login_required
+def adminViewStudentProgress():
+    student_email = request.args.get('email')
+    task_name = request.args.get('task_name')
+
+    # Fetch the student and the task by name
+    student = User.query.filter_by(email=student_email).first()
+    if not student:
+        return "Student not found", 404
+
+    task = Task.query.filter_by(title=task_name).first()
+    if not task:
+        return "Task not found", 404
+
+    # Fetch all subtasks for the task
+    subtasks = Subtask.query.filter_by(task_id=task.id).all()
+
+    # Fetch progress for the student
+    progress_data = Progress.query.filter_by(user_id=student.id, task_id=task.id).all()
+
+    # Create a dictionary of progress for fast lookup
+    progress_dict = {progress.subtask_id: progress.complete for progress in progress_data}
+
+    subtasks_progress = []
+    for subtask in subtasks:
+        status = 'complete' if progress_dict.get(subtask.id, False) else 'incomplete'
+        subtasks_progress.append({
+            'subtask': subtask.title,
+            'description': subtask.content,  # Add description here
+            'status': status
+        })
+
+    # Calculate overall progress
+    completed_subtasks = sum(1 for subtask in subtasks_progress if subtask['status'] == 'complete')
+    total_subtasks = len(subtasks)
+    progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
+
+    progress_ratio = f"{completed_subtasks} / {total_subtasks}"  # Show progress as a ratio, e.g., "2 / 5"
+    
+    return render_template('adminViewStudentProgress.html', student=student, task=task, 
+                           subtasks=subtasks_progress, progress_percent=progress_percent, progress_ratio=progress_ratio)
 
 if __name__ == '__main__':
     with app.app_context():
