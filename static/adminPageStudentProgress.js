@@ -81,7 +81,7 @@ function fetchTasks(userEmail) {
                 // Create the card for each task
                 const taskCard = `
                     <div class="col-12 mb-3 text-center card" style="background: #C7D9E0;">
-                        <a href="#" class="card-body d-flex justify-content-between align-items-center" onclick="fetchStudents('${taskName}')">
+                        <a href="/admin/view_student_progress?email=${encodeURIComponent(userEmail)}&task_name=${encodeURIComponent(taskName)}" class="card-body d-flex justify-content-between align-items-center">
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div class="me-3">
                                     <h5 class="card-title">${taskName}</h5>
