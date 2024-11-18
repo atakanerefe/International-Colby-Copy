@@ -47,52 +47,109 @@
     <!--{% include 'navbar.html' %}-->
     <content class="container row mx-auto mt-4">
         <h2 class="mb-4">Admin Dashboard</h2>
-        <div class="mb-3">
-            <button class="btn btn-danger" id="deleteSelected">Delete Selected</button>
-            <button class="btn btn-primary" id="updateLabels">Update Labels</button>
+        <div class="my-4 justify-content-between">
+            <div class=" row mb-4">
+
+                <!-- Search Section -->
+                <div class="col-lg-4">
+                    <div class="input-group m-1">
+                        <select class="form-select" id="searchDropdown">
+                            <option value="" selected>-- Search by: --</option>
+                            <option value="name">First Name</option>
+                            <option value="lastName">Last Name</option>
+                            <option value="email">Email</option>
+                            <option value="id">ID</option>
+                        </select>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search...">
+                        <!-- Reset Button -->
+                    </div>
+                    <button class="btn btn-secondary m-1" id="resetFilters">Reset Filters</button>
+                </div>
+
+
+                <!-- Task Management Section -->
+                <div class="col-lg-4">
+                    <div>
+                        <select class="form-select m-1" id="taskFilter">
+                            <option value="" selected>-- Select Task --</option>
+                            <option value="SSN">SSN Number</option>
+                            <option value="CPT">OPT</option>
+                            <option value="OPT">CPT</option>
+                        </select>
+                        <button class="btn btn-primary m-1" id="editTaskButton" disabled>Edit Task</button>
+                        <button class="btn btn-success m-1" id="addTaskButton">New Task</button>
+                        <button class="btn btn-danger m-1" id="removeTaskButton" disabled>Remove Task</button>
+                    </div>
+                </div>
+                
+        
+                
+            
+
+            
+            
+                <!-- Labels Management Section -->
+                <div class="col-lg-4">
+                    <div>
+                        <select class="form-select m-1" id="labelsDropdown">
+                            <option value="" selected>-- Select Label --</option>
+                            <option value="Co'25"><span class="badge bg-success m-1">Co'25</span></option>
+                            <option value="Co'26"><span class="badge bg-success m-1">Co'26</span></option>
+                            <option value="OPT"><span class="badge bg-warning text-dark">OPT</span></option>
+                        </select>
+                        <button class="btn btn-success m-1" id="addLabelButton">New Label</button>
+                        <button class="btn btn-danger m-1" id="removeLabelButton" disabled>Remove Label</button>    
+                    </div>                        
+                </div>
+            </div>
+  
+
+
+        
+
+
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" />
+                            </th>
+                            <th>Colby ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Labels</th>
+                            <th>Tasks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox" /></td>
+                            <td>11111</td>
+                            <td>Student</td>
+                            <td>Example</td>
+                            <td>student@colby.edu</td>
+                            <td><span class="badge bg-success m-1">Co'26</span><span class="badge bg-warning text-dark">OPT</span></td>
+                            <td>
+                                <a href="">2/2</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox" /></td>
+                            <td>434343</td>
+                            <td>Atakan</td>
+                            <td>Erefe</td>
+                            <td>aerefe26@colby.edu</td>
+                            <td><span class="badge bg-success m-1">Co'25</span></td>
+                            <td>
+                                <a href="">3/5</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-                <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="selectAll" />
-                        </th>
-                        <th>Colby ID</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Labels</th>
-                        <th>Tasks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="checkbox" class="row-checkbox" /></td>
-                        <td>######</td>
-                        <td>Student</td>
-                        <td>Example</td>
-                        <td>student@colby.edu</td>
-                        <td><span class="badge bg-success m-1">Co'26</span><span class="badge bg-warning text-dark">OPT</span></td>
-                        <td>
-                            <a href="">2/2</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" class="row-checkbox" /></td>
-                        <td>######</td>
-                        <td>Student</td>
-                        <td>Example</td>
-                        <td>student@colby.edu</td>
-                        <td><span class="badge bg-success m-1">Co'25</span></td>
-                        <td>
-                            <a href="">3/5</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
 
     </content>
     
@@ -105,6 +162,89 @@
             const checkboxes = document.querySelectorAll('.row-checkbox');
             checkboxes.forEach(checkbox => checkbox.checked = this.checked);
         });
+
+        document.getElementById('resetFilters').addEventListener('click', function () {
+            // Reset task filter
+            document.getElementById('taskFilter').value = '';
+            document.getElementById('editTaskButton').disabled = true;
+            document.getElementById('removeTaskButton').disabled = true;
+        
+            // Reset labels filter
+            document.getElementById('labelsDropdown').value = '';
+            document.getElementById('removeLabelButton').disabled = true;
+        
+            // Reset search inputs
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchDropdown').value = '';
+        
+            // Show all rows
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        });
+        
+        
+
+
+        // Enable/disable "Remove Label" button based on selection
+        document.getElementById('labelsDropdown').addEventListener('change', function () {
+            const selectedTask = this.value;
+            document.getElementById('removeLabelButton').disabled = !selectedTask;
+        });
+
+        // Enable/disable "Remove Task" button based on selection
+        document.getElementById('taskFilter').addEventListener('change', function () {
+                const selectedTask = this.value;
+                document.getElementById('removeTaskButton').disabled = !selectedTask;
+            });
+
+            function applyFilters() {
+                const searchBy = document.getElementById('searchDropdown').value.toLowerCase();
+                const searchValue = document.getElementById('searchInput').value.toLowerCase();
+                const selectedLabel = document.getElementById('labelsDropdown').value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
+            
+                rows.forEach(row => {
+                    let matchesSearch = true;
+                    let matchesLabel = true;
+            
+                    // Apply search filter
+                    if (searchBy && searchValue) {
+                        let cellValue;
+                        switch (searchBy) {
+                            case 'name':
+                                cellValue = row.children[2].textContent.toLowerCase();
+                                break;
+                            case 'lastname':
+                                cellValue = row.children[3].textContent.toLowerCase();
+                                break;
+                            case 'email':
+                                cellValue = row.children[4].textContent.toLowerCase();
+                                break;
+                            case 'id':
+                                cellValue = row.children[1].textContent.toLowerCase();
+                                break;
+                        }
+                        matchesSearch = cellValue ? cellValue.includes(searchValue) : false;
+                    }
+            
+                    // Apply label filter
+                    if (selectedLabel) {
+                        const labels = row.querySelectorAll('.badge');
+                        matchesLabel = Array.from(labels).some(label => label.textContent.toLowerCase() === selectedLabel);
+                    }
+            
+                    // Show row only if it matches both filters
+                    row.style.display = matchesSearch && matchesLabel ? '' : 'none';
+                });
+            }
+            
+            // Event listeners for filters
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('labelsDropdown').addEventListener('change', applyFilters);
+            
+
+
     </script>
 
 </body>
