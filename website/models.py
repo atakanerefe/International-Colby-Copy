@@ -7,12 +7,18 @@ user_task_association_table = db.Table('user_task_association',
     db.Column('task_id', db.Integer, db.ForeignKey('task.id'))
 )
 
+user_tag_association_table = db.Table('user_tag_association',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'))
+)
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(80), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=True)
     tasks = db.relationship('Task', secondary=user_task_association_table, backref=db.backref('users', lazy='dynamic'))
     progress = db.relationship('Progress', backref='user')
+    tags = db.relationship('Tag', secondary=user_tag_association_table, backref=db.backref('users', lazy='dynamic'))
 
     # implement get_id method
     def get_id(self):
@@ -46,6 +52,10 @@ class Progress(db.Model):
     subtask_id = db.Column(db.Integer, db.ForeignKey('subtask.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    html_class = db.Column(db.String(120), nullable=False)
 
 # def add_sample_data():
 #     # Create or fetch users
