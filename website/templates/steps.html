@@ -36,15 +36,15 @@
                     <div class="d-flex justify-content-center mt-4">
                       <!-- previous button -->
                         {% if active_step > 1 %}
-                            <a href="{{ url_for('steps', step=active_step - 1) }}" class="btn btn-dark">Previous</a>
+                            <a href="{{ url_for('main.steps', step=active_step - 1) }}" class="btn btn-dark">Previous</a>
                         {% endif %}
                         <!-- next button with hardcoded value cuz don't have length of subtask -->
                         {% if active_step < 6 %}
-                            <a href="{{ url_for('steps', step=active_step + 1) }}" class="btn btn-dark ml-2">Next</a>
+                            <a href="{{ url_for('main.steps', step=active_step + 1) }}" class="btn btn-dark ml-2">Next</a>
                         {% endif %}
                         <!-- submit button -->
                         {% if active_step == 6 %}
-                            <a href="{{ url_for('steps', step=active_step + 1) }}" class="btn btn-dark ml-2">Submit</a>
+                            <a href="{{ url_for('main.steps', step=active_step + 1) }}" class="btn btn-dark ml-2">Submit</a>
                         {% endif %}
     
                     </div>
