@@ -17,7 +17,7 @@ def todo():
         db.session.commit()
         
     tasks = Task.query.filter_by(user=current_user).all()
-    return render_template('todo.html', tasks=tasks)
+    return render_template('task.html', tasks=tasks)
 
 @main_blueprint.route('/task')
 @login_required
