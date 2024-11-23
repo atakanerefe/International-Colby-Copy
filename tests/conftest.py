@@ -17,7 +17,7 @@ def test_client():
 @pytest.fixture(scope='module')
 def init_database(test_client):
 
-    test_client.post('/signup', data=dict(username='test', password='test'), follow_redirects=True)
+    test_client.post('/addTask', data=dict(task='task1', subtask="subtask1", step="step1", content="step contents", follow_redirects=True))
 
     yield # this is where the testing happens!
 
