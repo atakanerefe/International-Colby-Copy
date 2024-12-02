@@ -170,13 +170,15 @@
             // Reset task filter
             document.getElementById('taskFilter').value = '';
             document.getElementById('editTaskButton').disabled = true;
-            document.getElementById('removeTaskButton').disabled = true;
             document.getElementById('assignTaskButton').disabled = true;
+            document.getElementById('removeTaskButton').disabled = true;
 
             // Reset labels filter
             document.getElementById('labelsDropdown').value = '';
+            document.getElementById('editLabelButton').disabled = true;
+            document.getElementById('assignLabelButton').disabled = true;
             document.getElementById('removeLabelButton').disabled = true;
-        
+
             // Reset search inputs
             document.getElementById('searchInput').value = '';
             document.getElementById('searchDropdown').value = '';
@@ -189,6 +191,18 @@
         
         
 
+
+        // Enable/disable "Edit Label" button based on selection
+        document.getElementById('labelsDropdown').addEventListener('change', function () {
+            const selectedTask = this.value;
+            document.getElementById('editLabelButton').disabled = !selectedTask;
+        });
+
+        // Enable/disable "Assign Label" button based on selection
+        document.getElementById('labelsDropdown').addEventListener('change', function () {
+            const selectedTask = this.value;
+            document.getElementById('assignLabelButton').disabled = !selectedTask;
+        });
 
         // Enable/disable "Remove Label" button based on selection
         document.getElementById('labelsDropdown').addEventListener('change', function () {
