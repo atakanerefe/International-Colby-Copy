@@ -98,11 +98,46 @@
                             <option value="Co'26"><span class="badge bg-success m-1">Co'26</span></option>
                             <option value="OPT"><span class="badge bg-warning text-dark">OPT</span></option>
                         </select>
-                        <button class="btn btn-primary m-1" id="addLabelButton">New Label</button>
-                        <button class="btn btn-secondary m-1" id="editLabelButton">Edit</button>
+                        <button class="btn btn-primary m-1" id="addLabelButton" data-bs-toggle="modal" data-bs-target="#labelModal">New Label</button>
                         <button class="btn btn-success m-1" id="assignLabelButton" disabled>Assign</button>    
                         <button class="btn btn-danger m-1" id="removeLabelButton" disabled>Remove</button>    
                     </div>                        
+                </div>
+            </div>
+            
+            <!-- Modal for Adding Labels -->
+            <div class="modal fade" id="labelModal" tabindex="-1" aria-labelledby="labelModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="labelModalLabel">Add Label</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <form id="labelForm">
+                        <div class="mb-3">
+                        <label for="labelName" class="form-label">Label Name</label>
+                        <input type="text" class="form-control" id="labelName" placeholder="Enter label name" required>
+                        </div>
+                        <div class="mb-3">
+                        <label for="labelColor" class="form-label">Select Color</label>
+                        <select class="form-select" id="labelColor">
+                            <option value="bg-primary">Blue</option>
+                            <option value="bg-secondary">Gray</option>
+                            <option value="bg-success">Green</option>
+                            <option value="bg-danger">Red</option>
+                            <option value="bg-warning text-dark">Yellow</option>
+                            <option value="bg-info">Cyan</option>
+                            <option value="bg-dark text-light">Black</option>
+                        </select>
+                        </div>
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveLabelButton"  data-bs-dismiss="modal">Save Label</button>
+                    </div>
+                </div>
                 </div>
             </div>
   
@@ -175,7 +210,6 @@
 
             // Reset labels filter
             document.getElementById('labelsDropdown').value = '';
-            document.getElementById('editLabelButton').disabled = true;
             document.getElementById('assignLabelButton').disabled = true;
             document.getElementById('removeLabelButton').disabled = true;
 
@@ -190,13 +224,6 @@
         });
         
         
-
-
-        // Enable/disable "Edit Label" button based on selection
-        document.getElementById('labelsDropdown').addEventListener('change', function () {
-            const selectedTask = this.value;
-            document.getElementById('editLabelButton').disabled = !selectedTask;
-        });
 
         // Enable/disable "Assign Label" button based on selection
         document.getElementById('labelsDropdown').addEventListener('change', function () {
@@ -277,6 +304,37 @@
             document.getElementById('searchInput').addEventListener('input', applyFilters);
             document.getElementById('labelsDropdown').addEventListener('change', applyFilters);
             
+
+            // The New Label Menu
+            document.getElementById('saveLabelButton').addEventListener('click', function () {
+                const labelName = document.getElementById('labelName').value.trim();
+                const labelColor = document.getElementById('labelColor').value;
+            
+                if (labelName) {
+                    // Create a new option for the dropdown
+                    const newOption = document.createElement('option');
+                    newOption.value = labelName.toLowerCase();
+                    newOption.innerHTML = `<span class="badge ${labelColor}">${labelName}</span>`;
+            
+                    // Add the new option to the dropdown
+                    const labelsDropdown = document.getElementById('labelsDropdown');
+                    labelsDropdown.appendChild(newOption);
+            
+                    // Reset the form and close the modal
+                    document.getElementById('labelForm').reset();
+                    const modalElement = document.getElementById('labelModal');
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.hide();
+
+                } else {
+                    alert('Please enter a label name.');
+                }
+            });
+
+            document.getElementById('labelModal').addEventListener('hidden.bs.modal', function () {
+                document.getElementById('labelForm').reset();
+            });
+
 
 
     </script>
