@@ -135,6 +135,12 @@ def admin():
 def addTask():
     return render_template('addTask.html')
 
+@app.route('/allStudents')
+@login_required
+def allStudents():
+    return render_template('allStudents.html')
+
+
 def add_sample_data():
     # Create or fetch users
     users_data = [
