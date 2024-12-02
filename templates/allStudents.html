@@ -76,9 +76,10 @@
                             <option value="CPT">OPT</option>
                             <option value="OPT">CPT</option>
                         </select>
-                        <button class="btn btn-primary m-1" id="editTaskButton" disabled>Edit Task</button>
-                        <button class="btn btn-success m-1" id="addTaskButton">New Task</button>
-                        <button class="btn btn-danger m-1" id="removeTaskButton" disabled>Remove Task</button>
+                        <button class="btn btn-primary m-1" id="addTaskButton">New Task</button>
+                        <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit</button>
+                        <button class="btn btn-success m-1" id="assignTaskButton" disabled>Assign</button>
+                        <button class="btn btn-danger m-1" id="removeTaskButton" disabled>Remove</button>
                     </div>
                 </div>
                 
@@ -97,8 +98,10 @@
                             <option value="Co'26"><span class="badge bg-success m-1">Co'26</span></option>
                             <option value="OPT"><span class="badge bg-warning text-dark">OPT</span></option>
                         </select>
-                        <button class="btn btn-success m-1" id="addLabelButton">New Label</button>
-                        <button class="btn btn-danger m-1" id="removeLabelButton" disabled>Remove Label</button>    
+                        <button class="btn btn-primary m-1" id="addLabelButton">New Label</button>
+                        <button class="btn btn-secondary m-1" id="editLabelButton">Edit</button>
+                        <button class="btn btn-success m-1" id="assignLabelButton" disabled>Assign</button>    
+                        <button class="btn btn-danger m-1" id="removeLabelButton" disabled>Remove</button>    
                     </div>                        
                 </div>
             </div>
@@ -168,7 +171,8 @@
             document.getElementById('taskFilter').value = '';
             document.getElementById('editTaskButton').disabled = true;
             document.getElementById('removeTaskButton').disabled = true;
-        
+            document.getElementById('assignTaskButton').disabled = true;
+
             // Reset labels filter
             document.getElementById('labelsDropdown').value = '';
             document.getElementById('removeLabelButton').disabled = true;
@@ -192,12 +196,28 @@
             document.getElementById('removeLabelButton').disabled = !selectedTask;
         });
 
+
+        // Enable/disable "Edit Task" button based on selection
+        document.getElementById('taskFilter').addEventListener('change', function () {
+            const selectedTask = this.value;
+            document.getElementById('editTaskButton').disabled = !selectedTask;
+        });
+
+
+        // Enable/disable "Assign Task" button based on selection
+        document.getElementById('taskFilter').addEventListener('change', function () {
+            const selectedTask = this.value;
+            document.getElementById('assignTaskButton').disabled = !selectedTask;
+        });
+
+
         // Enable/disable "Remove Task" button based on selection
         document.getElementById('taskFilter').addEventListener('change', function () {
                 const selectedTask = this.value;
                 document.getElementById('removeTaskButton').disabled = !selectedTask;
             });
-
+            
+        
             function applyFilters() {
                 const searchBy = document.getElementById('searchDropdown').value.toLowerCase();
                 const searchValue = document.getElementById('searchInput').value.toLowerCase();
