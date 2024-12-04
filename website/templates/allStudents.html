@@ -69,9 +69,10 @@
                 <!-- Task Management Section -->
                 <div class="col-lg-4">
                     <div>
-                        <select class="form-select m-1" id="taskFilter">
+                        <!-- new line for select class with handleTaskSelection() -->
+                        <select class="form-select m-1" id="taskFilter" onchange="handleTaskSelection()">
                             <option value="" selected>-- Select Task --</option>
-                            <option value="SSN">SSN Number</option>
+                            <option value="First Year Check In">First Year Check In</option>
                             <option value="CPT">OPT</option>
                             <option value="OPT">CPT</option>
                         </select>
