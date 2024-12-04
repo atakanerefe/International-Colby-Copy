@@ -17,25 +17,25 @@
         <div class="container-fluid my-3">
           <div class="row">
                   <h1 class="display-5 fw-bold">Add Task</h1>
-                  <form class="col-lg-5">
+                  <form class="col-lg-5" method="POST" action="{{ url_for('main.addTaskToDatabase') }}">
                     <div class="form-group fs-1 mb-4">
                       <label for="exampleFormControlInput1">Task Name:</label>
-                      <input type="text" class="form-control"  placeholder="Get SSN Number">
+                      <input type="text" name="task_name" class="form-control" placeholder="Get SSN Number">
                       <label for="exampleFormControlInput1">Deadline:</label>
-                      <input type="date" class="form-control"  placeholder="Deadline">
+                      <input type="date" name="deadline" class="form-control" placeholder="Deadline">
                     </div>
                     <ol class="list-group list-group-flush" id="subtask-list">
                       <li class="list-group-item"  style="background-color: #C7D9E0;">
                         <div class="form-group fs-3 mb-4">
                           <label>Sub-Task Title:</label>
-                          <input type="text" class="form-control" placeholder="Find an on campus job">
+                          <input type="text" name="subtask_title[]" class="form-control" placeholder="Find an on-campus job">
                         </div>
 
                         <ul class="list-group step-list">
                           <li class="list-group-item">
                             <div class="form-group fs-5 mb-4">
                               <label>Step Title:</label>
-                              <input type="text" class="form-control" placeholder="Setup your workday account">
+                              <input type="text" name="step_title[0][]" class="form-control" placeholder="Setup your Workday account">
                             </div>
                             <div class="form-group mb-3">
                               <label>Example textarea</label>
