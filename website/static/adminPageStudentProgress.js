@@ -1,3 +1,77 @@
+// This function gets the task selected in the dropdown menu and passes it into the fetchStudents function
+function handleTaskSelection() {
+    const taskFilter = document.getElementById('taskFilter');
+    const selectedTask = taskFilter.value;
+    console.log("this is a selected task: ", selectedTask)
+
+    if (selectedTask) {
+        // Call the fetchStudents function with the selected task
+        fetchStudentsNew(selectedTask);
+    } else {
+        console.log("No task selected");
+    }
+}
+
+
+// NEW VERSION OF FETCHSTUDENTS
+// after selecting a task from admin home page
+// This function fetches students who have the selected task and their progress
+function fetchStudentsNew(taskName) {
+    console.log("we're in :D ")
+    changeTaskName(taskName);
+
+    console.log("we're suoer in :D ")
+
+    fetch(`/get_students_by_task?task=${taskName}`)
+        .then(response => response.json())
+        .then(data => {
+            const students = data.students;
+            console.log("data: ", data)
+            console.log("students: ", students)
+
+            // Clear previous student cards
+            const studentCardsContainer = document.getElementById('tableBody');
+            studentCardsContainer.innerHTML = '';
+
+            // For each student, display the student's progress
+            students.forEach(student => {
+                const studentEmail = student.email;
+                const studentProgress = student.progress;
+                const studentID = student.id; 
+                const fullName = student.name; 
+                console.log("this is the fullname: ", fullName)
+                // split the full name based on a space (assuming one word names)
+                const [firstName, lastName] = fullName.split(' ');
+                const progressText = `${studentProgress.completed}/${studentProgress.total}`;
+                
+                // const labelsHtml = student.tags.map(tag => `<span class="badge ${tag.html_class} m-1">${tag.name}</span>`).join('');
+// <td>${labelsHtml}</td>
+                // Create table row
+                const tableRow = `
+                    <tr>
+                        <td><input type="checkbox" class="row-checkbox" /></td>
+                        <td>${studentID}</td>
+                        <td>${firstName}</td>
+                        <td>${lastName}</td>
+                        <td>${studentEmail}</td>
+                        <td>${lastName}</td>
+                        
+                        <td>
+                            <a href="/admin/view_student_progress?email=${encodeURIComponent(studentEmail)}&task_name=${encodeURIComponent(taskName)}">${progressText}</a>
+                        </td>
+                    </tr>
+                `;
+
+                // Append row to the table body
+                tableBody.innerHTML += tableRow;
+
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching student progress:', error);
+        });
+}
+
 // This function fetches students who have the selected task and their progress
 function fetchStudents(taskName) {
 
