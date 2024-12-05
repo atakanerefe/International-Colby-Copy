@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for
 from flask import request
 from website import db
-from .models import Progress, Subtask, User, Task, user_task_association_table
+from .models import Progress, Subtask, User, Task, Step, user_task_association_table
 from flask_login import login_required, current_user
+from datetime import datetime
 
 # Create a blueprint
 main_blueprint = Blueprint('main', __name__)
@@ -39,6 +40,9 @@ def steps():
 @main_blueprint.route('/admin')
 @login_required
 def admin():
+
+    # DYNAMICALLY DISPLAY TASKS FOR FUTURE USE
+    # return render_template('allStudents.html', tasks=Task.query.all())
     return render_template('allStudents.html')
 
 @main_blueprint.route('/admin/addTask')
@@ -178,6 +182,46 @@ def adminViewStudentProgress():
     
     return render_template('adminViewStudentProgress.html', student=student, task=task, 
                            subtasks=subtasks_progress, progress_percent=progress_percent, progress_ratio=progress_ratio)
+
+@main_blueprint.route('/admin/addTask', methods=['POST'])
+@login_required
+def addTaskToDatabase():
+    # Get form data
+    task_name = request.form.get('task_name')
+    deadline_str = request.form.get('deadline')
+    subtask_titles = request.form.getlist('subtask_title[]')
+    step_titles = request.form.to_dict(flat=False).get('step_title[]', [])
+
+    # Convert deadline to datetime
+    deadline = datetime.strptime(deadline_str, '%Y-%m-%d') if deadline_str else None
+
+    # Create the task
+    task = Task(title=task_name, content=f"Task created by {current_user.name}", deadline=deadline)
+    db.session.add(task)
+    db.session.commit()
+
+    # Create subtasks and steps
+    for i, subtask_title in enumerate(subtask_titles):
+        subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}", task_id=task.id)
+        db.session.add(subtask)
+        db.session.commit()
+
+        if i < len(step_titles):
+            for step_title in step_titles[i]:
+                step = Step(title=step_title, content=f"Step for {subtask_title}", subtask_id=subtask.id, progress=0)
+                db.session.add(step)
+        db.session.commit()
+
+    # Assign task to all users (optional)
+    users = User.query.all()
+    for user in users:
+        task.users.append(user)
+        for subtask in task.subtasks:
+            progress = Progress(user_id=user.id, subtask_id=subtask.id, task_id=task.id, complete=False)
+            db.session.add(progress)
+    db.session.commit()
+
+    return redirect(url_for('main.admin'))
 
 def add_sample_data():
     # Create or fetch users
