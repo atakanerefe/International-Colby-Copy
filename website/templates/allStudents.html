@@ -69,20 +69,13 @@
                 <!-- Task Management Section -->
                 <div class="col-lg-4">
                     <div>
-                        <!-- new line for select class with handleTaskSelection() -->
+                        <!-- DYNAMICALLY DISPLAY TASKS -->
                         <select class="form-select m-1" id="taskFilter" onchange="handleTaskSelection()">
-                            <option value="" selected>-- Select Task --</option>
-                            <option value="First Year Check In">First Year Check In</option>
-                            <option value="CPT">OPT</option>
-                            <option value="OPT">CPT</option>
-                        </select>
-                        <!-- DYNAMICALLY DISPLAY TASKS FOR FUTURE USE -->
-                        <!-- <select class="form-select m-1" id="taskFilter" onchange="handleTaskSelection()">
                             <option value="" selected>-- Select Task --</option>
                             {% for task in tasks %}
                                 <option value="{{ task.title }}">{{ task.title }}</option>
                             {% endfor %}
-                        </select>       -->
+                        </select>      
                         <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.addTask') }}">New Task</a>
                         <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit</button>
                         <button class="btn btn-success m-1" id="assignTaskButton" disabled>Assign</button>
