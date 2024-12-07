@@ -272,13 +272,13 @@ def add_sample_data():
         db.session.commit()
 
     # repeat for task2 =====================================================
-    existing_users_in_task2 = set(user.id for user in task2.users) 
     task2 = Task.query.filter_by(title="Get Social Security Number").first()
     if not task2:
         task2 = Task(title="Get Social Security Number", content="This is a second sample task.")
         db.session.add(task2)
         db.session.commit()
 
+    existing_users_in_task2 = set(user.id for user in task2.users) 
     # print("task2 existing users: ", existing_users_in_task2)
     user_to_add_task2 = User.query.filter_by(name="Tricia").first()
     # print("Tricia to add: ", user_to_add_task2)
