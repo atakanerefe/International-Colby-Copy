@@ -262,6 +262,7 @@ def add_sample_data():
 
     # Check if the user-task association already exists before adding
     existing_users_in_task = set(user.id for user in task.users)  # Set of user IDs already associated with this task
+    # print("task existing users: ", existing_users_in_task)
     users_to_add = [user for user in users if user.id not in existing_users_in_task]
 
     if users_to_add:
@@ -269,6 +270,25 @@ def add_sample_data():
         for user in users_to_add:
             task.users.append(user)
         db.session.commit()
+
+    # repeat for task2 =====================================================
+    existing_users_in_task2 = set(user.id for user in task2.users) 
+    task2 = Task.query.filter_by(title="Get Social Security Number").first()
+    if not task2:
+        task2 = Task(title="Get Social Security Number", content="This is a second sample task.")
+        db.session.add(task2)
+        db.session.commit()
+
+    # print("task2 existing users: ", existing_users_in_task2)
+    user_to_add_task2 = User.query.filter_by(name="Tricia").first()
+    # print("Tricia to add: ", user_to_add_task2)
+
+    if user_to_add_task2:
+        if user_to_add_task2.id not in existing_users_in_task2:
+            # Add users who are not yet associated with the task
+            task2.users.append(user_to_add_task2)
+        db.session.commit()
+
 
     # Create subtasks and assign them to the task
     subtasks_data = [
