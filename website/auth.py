@@ -12,7 +12,8 @@ auth_blueprint = Blueprint('auth', __name__)
 admin_emails = [
         "mbeltguz@colby.edu",
         "aemoreno@colby.edu",
-        "mfreese@colby.edu"
+        "mfreese@colby.edu",
+        "obraym25@colby.edu"
     ]
 
 @auth_blueprint.route('/login', methods=['GET', 'POST'])
@@ -39,7 +40,8 @@ def authorized():
     loginUser(me.data)
     # Here, 'me.data' contains user information.
     # You can perform registration process using this information if needed.
-
+    if me.data['email'] in admin_emails:
+        return redirect(url_for('main.admin'))
     return redirect(url_for('main.task'))
 
 def loginUser(userinfo):

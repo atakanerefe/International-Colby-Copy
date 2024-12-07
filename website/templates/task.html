@@ -21,7 +21,7 @@
                     <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: {{ task.progress.percent }}%">{{ task.progress.completed }} / {{ task.progress.total }}</div>
                 </div>
                 <!-- Add argument to subtask URL to send info on task-->
-                <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask')}}">Begin</a>
+                <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask', task_id=task.id)}}">Begin</a>
             </div>
         </div>
         {% endfor %}

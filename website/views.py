@@ -8,6 +8,21 @@ from datetime import datetime
 # Create a blueprint
 main_blueprint = Blueprint('main', __name__)
 
+admin_emails = [
+        "mbeltguz@colby.edu",
+        "aemoreno@colby.edu",
+        "mfreese@colby.edu",
+        "obraym25@colby.edu"
+    ]
+
+def getSubtaskStatusByProgress(subtask):
+    progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask.id).first()
+    print(progress.id, progress.complete)
+    if progress:
+        print('complete' if progress.complete else 'incomplete')
+        return 'complete' if progress.complete else 'incomplete'
+    return 'incomplete'
+
 @main_blueprint.route('/', methods=['GET', 'POST'])
 @login_required
 def todo():
@@ -20,16 +35,28 @@ def todo():
     tasks = Task.query.filter_by(user=current_user).all()
     return render_template('task.html', tasks=tasks)
 
+@main_blueprint.route('/home')
+@login_required
+def home():
+    if current_user.email in admin_emails: # change in future iteration
+        return redirect(url_for('main.admin'))
+    return redirect(url_for('main.task'))
+
 @main_blueprint.route('/task')
 @login_required
 def task():
     tasks = run_get_tasks_by_email(current_user.email)
     return render_template('task.html', tasks=tasks)
 
-@main_blueprint.route('/subtask')
+@main_blueprint.route('/subtask/<int:task_id>')
 @login_required
-def subtask():
-    return render_template('subtask.html')
+def subtask(task_id):
+    # get all subtasks for a task
+    subtasks = Subtask.query.filter_by(task_id=task_id).all()
+    subtask_progress = {}
+    for subtask in subtasks:
+        subtask_progress[subtask] = getSubtaskStatusByProgress(subtask)
+    return render_template('subtask.html', subtasks=subtasks, subtask_progress=subtask_progress)
 
 @main_blueprint.route('/steps')
 @login_required
@@ -131,6 +158,7 @@ def run_get_tasks_by_email(email, js_call=False):
         tasks_data.append({
             'title': task.title,
             'content': task.content,
+            'id': task.id,
             'progress': {
                 'completed': completed_subtasks,
                 'total': len(subtasks),
