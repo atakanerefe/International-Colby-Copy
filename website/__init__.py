@@ -26,7 +26,7 @@ def create_app():
     GOOGLE = google_auth(app)
 
     from .models import User
-    from .views import main_blueprint
+    from .views import main_blueprint, getSubtaskStatusByProgress
     from .auth import auth_blueprint
 
     @login_manager.user_loader
@@ -42,6 +42,12 @@ def create_app():
         db.create_all()  # Create tables (if not created)
         # add_sample_data() # harcoding data for demo
         #app.run(debug=True)
+
+    @app.context_processor
+    def jinjaHelper():
+        def getSubtaskStatus(subtask):
+            return getSubtaskStatusByProgress(subtask)
+        return dict(subtask_status = getSubtaskStatusByProgress)
 
     return app
 
