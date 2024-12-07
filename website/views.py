@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for
 from flask import request
 from website import db
-from .models import Progress, Subtask, User, Task, Step, user_task_association_table
+from .models import Progress, Subtask, User, Task, Step, Tag, user_task_association_table, user_tag_association_table
 from flask_login import login_required, current_user
 from datetime import datetime
 
@@ -23,8 +23,11 @@ def todo():
 @main_blueprint.route('/task')
 @login_required
 def task():
+    student = User.query.filter_by(email=current_user.email).first()
+    if not student:
+        return "Student not found", 404
     tasks = run_get_tasks_by_email(current_user.email)
-    return render_template('task.html', tasks=tasks)
+    return render_template('task.html', tasks=tasks, student=student)
 
 @main_blueprint.route('/subtask')
 @login_required
@@ -93,6 +96,24 @@ def get_students_by_task():
         })
 
     return jsonify({'students': students_data})
+
+@main_blueprint.route('/get_tags_for_student')
+def get_tags_for_student():
+    student_name = request.args.get('student')
+
+    # Fetch the student
+    student = User.query.filter_by(name=student_name).first()
+
+    if not student:
+        return jsonify({'error': 'Student not found'}), 404
+
+    # Fetch all users assigned to this task using the user_task_association_table
+    # students = User.query.join(user_task_association_table).join(Task).filter(Task.id == task.id).all()
+    tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == user.id).all()
+    serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
+
+    return jsonify({'tags': serialized_tags})
+
 
 @main_blueprint.route('/get_tasks_by_email')
 def get_tasks_by_email():

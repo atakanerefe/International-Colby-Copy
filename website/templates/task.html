@@ -8,23 +8,50 @@
 
 <body>
     {% include 'navbar.html' %}
-
+    
     <content class="container row mx-auto mt-4">
-        <h5 class="text-center h2 pb-4">Tasks</h5>
+        <content class="container row mx-auto mt-4">
+            <!-- creating a tag label for student view that should be uneditable -->
+            <h5 class="col-lg-3 text-start h2 pb-4">Welcome, {{ student.name }}!</h5>
+            <!-- <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;"> -->
+            <div class="col-lg-3 text-end card-body" id="label-tag">
+                <!-- Card title on the left -->
+                <h5 class="card-title mb-0">Your tags:</h5>
 
-        {% for task in tasks: %}
-        <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;">
-            <div class="card-body">
-                <h5 class="card-title">{{ task.title }}</h5>
-                <p class="card-text">Deadline</p>
-                <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: {{ task.progress.percent }}%">{{ task.progress.completed }} / {{ task.progress.total }}</div>
+                <!-- Tags piled to the right -->
+                <div class="d-flex gap-2 flex-wrap justify-content-end" id="tagsContainer" studentName="{{ student.name }}">
+                    <!-- Dynamically populated tags will go here -->
                 </div>
-                <!-- Add argument to subtask URL to send info on task-->
-                <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask')}}">Begin</a>
+
+                <!-- <div class="d-flex flex-wrap justify-content-end"> -->
+                <!-- <div id="tags-container", class="d-flex justify-content-end tags-container"> -->
+                    <!-- <span class="badge bg-success m-1">Co'26</span>
+                    <span class="badge bg-warning text-dark m-1">OPT</span>
+                    <span class="badge bg-primary m-1">Intern</span>
+                    <span class="badge bg-danger m-1">Visa</span>
+                    <span class="badge bg-secondary m-1">Research</span> -->
+                <!-- </div> -->
             </div>
-        </div>
-        {% endfor %}
+            <!-- </div> -->
+        </content>
+
+        <content class="container row mx-auto mt-4">
+            {% for task in tasks: %}
+            <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;">
+                <div class="card-body" id="task-card">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text">Deadline</p>
+                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: {{ task.progress.percent }}%">{{ task.progress.completed }} / {{ task.progress.total }}</div>
+                    </div>
+                    <!-- Add argument to subtask URL to send info on task-->
+                    <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask')}}">Begin</a>
+                </div>
+            </div>
+            {% endfor %}
+        </content>
     </content>
+
+    <script src="../static/studentDashboardTags.js"></script>
 
 </body>
