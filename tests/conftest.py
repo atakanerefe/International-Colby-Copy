@@ -1,26 +1,72 @@
 import pytest
 from website import create_app, db
-from flask import session
-import os
+from website.models import User, Task, Subtask, Step, Progress, Tag
+from datetime import datetime
 
-@pytest.fixture(scope='module')
+
+@pytest.fixture(scope="module")
 def test_client():
-    # Set the Testing configuration prior to creating the Flask application
-    os.environ['CONFIG_TYPE'] = 'config.TestingConfig'
-    flask_app = create_app()
+    """Set up a Flask test client."""
+    app = create_app()
+    app.config.update(
+        {
+            "TESTING": True,
+            "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+        }
+    )
 
-    # Create a test client using the Flask application configured for testing
-    with flask_app.test_client() as test_client:
-        yield test_client # this is where the testing happens!
+    with app.test_client() as client:
+        with app.app_context():
+            db.create_all()
+        yield client
+        with app.app_context():
+            db.drop_all()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="function")
 def init_database(test_client):
-
-    test_client.post('/addTask', data=dict(task='task1', subtask="subtask1", step="step1", content="step contents", follow_redirects=True))
-
-    yield # this is where the testing happens!
-
-    # Delete the user after the tests run
+    """Initialize the database with test data."""
     with test_client.application.app_context():
-        db.drop_all()
+
+        db.session.query(Progress).delete()
+        db.session.query(Step).delete()
+        db.session.query(Subtask).delete()
+        db.session.query(Task).delete()
+        db.session.query(Tag).delete()
+        db.session.query(User).delete()
+        db.session.commit()
+
+        user = User(email="test_user@example.com", name="Test User")
+        db.session.add(user)
+        db.session.commit()
+
+        task = Task(title="Test Task", content="This is a test task.", deadline=datetime.utcnow())
+        db.session.add(task)
+        db.session.commit()
+
+        subtask = Subtask(title="Test Subtask", content="Subtask Content", task_id=task.id)
+        db.session.add(subtask)
+        db.session.commit()
+
+        step = Step(title="Test Step", content="Step Content", progress=0, subtask_id=subtask.id)
+        db.session.add(step)
+
+        progress = Progress(complete=False, user_id=user.id, task_id=task.id, subtask_id=subtask.id)
+        db.session.add(progress)
+
+        tag = Tag(name="Co'26", html_class="label-Co'26")
+        db.session.add(tag)
+        user.tags.append(tag)
+
+        db.session.commit()
+
+    yield db
+
+    with test_client.application.app_context():
+        db.session.rollback()
+
+
+
+
+
