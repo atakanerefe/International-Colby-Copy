@@ -109,7 +109,7 @@ def get_tags_for_student():
 
     # Fetch all users assigned to this task using the user_task_association_table
     # students = User.query.join(user_task_association_table).join(Task).filter(Task.id == task.id).all()
-    tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == user.id).all()
+    tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == student.id).all()
     serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
 
     return jsonify({'tags': serialized_tags})
@@ -347,3 +347,44 @@ def add_sample_data():
                 progress = Progress(complete=complete, user_id=user.id, subtask_id=subtask.id, task_id=task.id)
                 db.session.add(progress)
     db.session.commit()
+
+    # creating tags uniquely =====================================================
+    # TAG 1
+    tag1 = Tag.query.filter_by(name="tag1").first()
+    if not tag1:
+        tag1 = Tag(name="tag1", html_class="bg-warning")
+        db.session.add(tag1)
+        db.session.commit()
+
+    # TAG 2
+    tag2 = Tag.query.filter_by(name="tag2").first()
+    if not tag2:
+        tag2 = Tag(name="tag2", html_class="bg-warning")
+        db.session.add(tag2)
+        db.session.commit()
+
+    # assign to two users
+    existing_users_with_tag1 = set(user.id for user in tag1.users) 
+    existing_users_with_tag2 = set(user.id for user in tag2.users) 
+    # print("task2 existing users: ", existing_users_in_task2)
+    user1_to_add_tag1 = User.query.filter_by(name="Tricia").first()
+    user2_to_add_tag1 = User.query.filter_by(name="Owen").first()
+    user1_to_add_tag2 = User.query.filter_by(name="Tricia").first()
+    # print("Tricia to add: ", user_to_add_task2)
+
+    if user1_to_add_tag1:
+        if user1_to_add_tag1.id not in existing_users_with_tag1:
+            # Add users who are not yet associated with the task
+            tag1.users.append(user1_to_add_tag1)
+            db.session.commit()
+    
+    if user2_to_add_tag1:
+        if user2_to_add_tag1.id not in existing_users_with_tag1:
+            tag1.users.append(user2_to_add_tag1)
+            db.session.commit()
+    
+    if user1_to_add_tag2:
+        if user1_to_add_tag2.id not in existing_users_with_tag2:
+            # Add users who are not yet associated with the task
+            tag2.users.append(user1_to_add_tag2)
+        db.session.commit()
