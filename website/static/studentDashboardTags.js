@@ -18,12 +18,6 @@ function fetchTagsForStudent(studentName) {
             const tagsContainer = document.getElementById('tagsContainer');
             tagsContainer.innerHTML = '<h5 class="card-title mb-0">Your tags:</h5>';
             
-
-            // const tagsTitle = document.createElement('span');
-            // tagsTitle.classList.add('fw-bold', 'me-2'); // Styling for bold and spacing
-            // tagsTitle.textContent = 'Your tags:';
-            // tagsContainer.appendChild(tagsTitle);
-
             // Dynamically create and append the tags as <span> elements
             tags.forEach(tag => {
                 const tagElement = document.createElement('span');
