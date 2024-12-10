@@ -19,7 +19,6 @@ def getSubtaskStatusByProgress(subtask):
     progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask.id).first()
     print(progress.id, progress.complete)
     if progress:
-        print('complete' if progress.complete else 'incomplete')
         return 'complete' if progress.complete else 'incomplete'
     return 'incomplete'
 
@@ -32,8 +31,7 @@ def todo():
         db.session.add(new_task)
         db.session.commit()
         
-    tasks = Task.query.filter_by(user=current_user).all()
-    return render_template('task.html', tasks=tasks)
+    return redirect(url_for('main.task'))
 
 @main_blueprint.route('/home')
 @login_required
