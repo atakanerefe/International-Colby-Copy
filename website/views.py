@@ -8,6 +8,20 @@ from datetime import datetime
 # Create a blueprint
 main_blueprint = Blueprint('main', __name__)
 
+admin_emails = [
+        "mbeltguz@colby.edu",
+        "aemoreno@colby.edu",
+        "mfreese@colby.edu",
+        "obraym25@colby.edu"
+    ]
+
+def getSubtaskStatusByProgress(subtask):
+    progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask.id).first()
+    print(progress.id, progress.complete)
+    if progress:
+        return 'complete' if progress.complete else 'incomplete'
+    return 'incomplete'
+
 @main_blueprint.route('/', methods=['GET', 'POST'])
 @login_required
 def todo():
@@ -17,8 +31,14 @@ def todo():
         db.session.add(new_task)
         db.session.commit()
         
-    tasks = Task.query.filter_by(user=current_user).all()
-    return render_template('task.html', tasks=tasks)
+    return redirect(url_for('main.task'))
+
+@main_blueprint.route('/home')
+@login_required
+def home():
+    if current_user.email in admin_emails: # change in future iteration
+        return redirect(url_for('main.admin'))
+    return redirect(url_for('main.task'))
 
 @main_blueprint.route('/task')
 @login_required
@@ -29,10 +49,15 @@ def task():
     tasks = run_get_tasks_by_email(current_user.email)
     return render_template('task.html', tasks=tasks, student=student)
 
-@main_blueprint.route('/subtask')
+@main_blueprint.route('/subtask/<int:task_id>')
 @login_required
-def subtask():
-    return render_template('subtask.html')
+def subtask(task_id):
+    # get all subtasks for a task
+    subtasks = Subtask.query.filter_by(task_id=task_id).all()
+    subtask_progress = {}
+    for subtask in subtasks:
+        subtask_progress[subtask] = getSubtaskStatusByProgress(subtask)
+    return render_template('subtask.html', subtasks=subtasks, subtask_progress=subtask_progress)
 
 @main_blueprint.route('/steps')
 @login_required
@@ -45,8 +70,8 @@ def steps():
 def admin():
 
     # DYNAMICALLY DISPLAY TASKS FOR FUTURE USE
-    # return render_template('allStudents.html', tasks=Task.query.all())
-    return render_template('allStudents.html')
+    return render_template('allStudents.html', tasks=Task.query.all())
+    # return render_template('allStudents.html')
 
 @main_blueprint.route('/admin/addTask')
 @login_required
@@ -88,6 +113,7 @@ def get_students_by_task():
         students_data.append({
             'email': student.email,
             'name' : student.name,
+            "id": student.student_id,
             'progress': {
                 'completed': completed_subtasks,
                 'total': total_subtasks,
@@ -152,6 +178,7 @@ def run_get_tasks_by_email(email, js_call=False):
         tasks_data.append({
             'title': task.title,
             'content': task.content,
+            'id': task.id,
             'progress': {
                 'completed': completed_subtasks,
                 'total': len(subtasks),
@@ -211,7 +238,13 @@ def addTaskToDatabase():
     task_name = request.form.get('task_name')
     deadline_str = request.form.get('deadline')
     subtask_titles = request.form.getlist('subtask_title[]')
-    step_titles = request.form.to_dict(flat=False).get('step_title[]', [])
+    step_titles = []
+    for key, value in request.form.items():
+        if key.startswith('step_title['):
+            subtask_index = int(key.split('[')[1].split(']')[0])
+            while len(step_titles) <= subtask_index:
+                step_titles.append([])
+            step_titles[subtask_index].append(value)
 
     # Convert deadline to datetime
     deadline = datetime.strptime(deadline_str, '%Y-%m-%d') if deadline_str else None

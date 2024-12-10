@@ -33,6 +33,8 @@
                     <!-- Add argument to subtask URL to send info on task-->
                     <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask')}}">Begin</a>
                 </div>
+                <!-- Add argument to subtask URL to send info on task-->
+                <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask', task_id=task.id)}}">Begin</a>
             </div>
             {% endfor %}
         </content>

@@ -1,49 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+<title>Colby International Office Form Helper</title>
 <head>
-    <!--{% include 'bootstrapStarter.html' %}-->
+    {% include 'bootstrapStarter.html' %}
 
-    <title>Colby International Office Form Helper</title>
 </head>
 
-
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-    <!-- Font Awesome CSS-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-  crossorigin="anonymous"></script>
-
-  <nav class="navbar navbar-expand-lg navbar-dark pb-4" style="background: #2463A1;">
-    <div class="container">
-        <a class="navbar-brand" href="{{url_for ('main.task')}}"><img src="../static/images/IntLogo.jpg" width=200 height=70 /></a>
-        <div class="nav-item">
-            <button class="btn">
-                <i class="fa fa-sign-out" aria-hidden="true" style="color: white;"></i>
-                <!--Don't use "i" tag for anything but Font-Awesome -Atakan -->
-                <a style="color: white" href= "{{url_for ('auth.logout')}}">Log Out</a>
-            </button>
-            <button class="btn nav-item">
-                <i class="fa-solid fa-message " style="color: white;"></i>
-            </button>
-        </div>
-    </div>
-</nav>
-
-
-
 <body>
-    <!--{% include 'navbar.html' %}-->
+    {% include 'navbar.html' %}
+
     <content class="container row mx-auto mt-4">
         <h2 class="mb-4" id="welcome-message">Admin Dashboard</h2>
         <div class="my-4 justify-content-between">
@@ -69,20 +34,13 @@
                 <!-- Task Management Section -->
                 <div class="col-lg-4">
                     <div>
-                        <!-- new line for select class with handleTaskSelection() -->
+                        <!-- DYNAMICALLY DISPLAY TASKS -->
                         <select class="form-select m-1" id="taskFilter" onchange="handleTaskSelection()">
-                            <option value="" selected>-- Select Task --</option>
-                            <option value="First Year Check In">First Year Check In</option>
-                            <option value="CPT">OPT</option>
-                            <option value="OPT">CPT</option>
-                        </select>
-                        <!-- DYNAMICALLY DISPLAY TASKS FOR FUTURE USE -->
-                        <!-- <select class="form-select m-1" id="taskFilter" onchange="handleTaskSelection()">
                             <option value="" selected>-- Select Task --</option>
                             {% for task in tasks %}
                                 <option value="{{ task.title }}">{{ task.title }}</option>
                             {% endfor %}
-                        </select>       -->
+                        </select>      
                         <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.addTask') }}">New Task</a>
                         <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit</button>
                         <button class="btn btn-success m-1" id="assignTaskButton" disabled>Assign</button>

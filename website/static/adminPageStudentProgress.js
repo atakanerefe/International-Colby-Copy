@@ -35,13 +35,17 @@ function fetchStudentsNew(taskName) {
 
             // For each student, display the student's progress
             students.forEach(student => {
+                console.log("Processing student:", student);
                 const studentEmail = student.email;
                 const studentProgress = student.progress;
                 const studentID = student.id; 
-                const fullName = student.name; 
+                var fullName = student.name; 
+                if (fullName == null) {
+                    fullName = student.email;
+                }
+                const [firstName, lastName] = fullName.split(' ');
                 console.log("this is the fullname: ", fullName)
                 // split the full name based on a space (assuming one word names)
-                const [firstName, lastName] = fullName.split(' ');
                 const progressText = `${studentProgress.completed}/${studentProgress.total}`;
                 
                 // const labelsHtml = student.tags.map(tag => `<span class="badge ${tag.html_class} m-1">${tag.name}</span>`).join('');

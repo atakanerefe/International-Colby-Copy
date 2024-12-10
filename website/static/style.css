@@ -23,3 +23,11 @@
 .status-incomplete {
     color: red;
 }
+
+.card-text.status-complete {
+    color: green;
+}
+
+.card-text.status-incomplete {
+    color: red;
+}

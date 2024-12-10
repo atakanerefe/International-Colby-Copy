@@ -38,7 +38,7 @@ function addSubtask() {
             <input type="text" class="form-control" placeholder="Enter step title">
         </div>
         <div class="form-group mb-3">
-            <label>Example textarea</label>
+            <label>Step Content:</label>
             <textarea class="form-control" rows="3"></textarea>
         </div>
     `;
