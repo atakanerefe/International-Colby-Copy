@@ -387,4 +387,4 @@ def add_sample_data():
         if user1_to_add_tag2.id not in existing_users_with_tag2:
             # Add users who are not yet associated with the task
             tag2.users.append(user1_to_add_tag2)
-        db.session.commit()
+            db.session.commit()

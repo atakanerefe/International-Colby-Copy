@@ -10,18 +10,28 @@
     {% include 'navbar.html' %}
     
     <content class="container row mx-auto mt-4">
-        <content class="container row mx-auto mt-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 m-6 mt-4">
             <!-- creating a tag label for student view that should be uneditable -->
-            <h5 class="col-lg-3 text-start h2 pb-4">Welcome, {{ student.name }}!</h5>
+            <h5 class="text-start h2 mb-0">Welcome, {{ student.name }}!</h5>
             <!-- <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;"> -->
-            <div class="col-lg-3 text-end card-body" id="label-tag">
-                <!-- Card title on the left -->
-                <h5 class="card-title mb-0">Your tags:</h5>
-
+            <div class="d-flex align-items-center gap-2 flex-wrap" id="tagsContainer" studentName="{{ student.name }}">
+                <!-- <div class="mr-auto p-2">Your tags:</div> -->
                 <!-- Tags piled to the right -->
-                <div class="d-flex gap-2 flex-wrap justify-content-end" id="tagsContainer" studentName="{{ student.name }}">
-                    <!-- Dynamically populated tags will go here -->
-                </div>
+                <!-- Dynamically populated tags will go here -->
+            </div>
+
+
+            <!-- <div class="col-lg-3 text-end card-body" id="label-tag"> -->
+                <!-- Card title on the left -->
+                <!-- <h5 class="card-title mb-0">Your tags:</h5> -->
+            <!-- </div> -->
+
+            <!-- <div class="d-flex gap-2 flex-wrap justify-content-end" id="tagsContainer" studentName="{{ student.name }}"> -->
+                <!-- Tags piled to the right -->
+                <!-- Dynamically populated tags will go here -->
+            <!-- </div> -->
+            
+        </div>
 
                 <!-- <div class="d-flex flex-wrap justify-content-end"> -->
                 <!-- <div id="tags-container", class="d-flex justify-content-end tags-container"> -->
@@ -31,9 +41,8 @@
                     <span class="badge bg-danger m-1">Visa</span>
                     <span class="badge bg-secondary m-1">Research</span> -->
                 <!-- </div> -->
-            </div>
             <!-- </div> -->
-        </content>
+        
 
         <content class="container row mx-auto mt-4">
             {% for task in tasks: %}
