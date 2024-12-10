@@ -110,6 +110,7 @@ def get_students_by_task():
         students_data.append({
             'email': student.email,
             'name' : student.name,
+            "id": student.student_id,
             'progress': {
                 'completed': completed_subtasks,
                 'total': total_subtasks,
