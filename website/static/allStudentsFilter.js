@@ -7,67 +7,70 @@ checkboxes.forEach(checkbox => checkbox.checked = this.checked);
 });
 
 document.getElementById('resetFilters').addEventListener('click', function () {
-// Reset task filter
-document.getElementById('taskFilter').value = '';
-document.getElementById('editTaskButton').disabled = true;
-document.getElementById('assignTaskButton').disabled = true;
-document.getElementById('removeTaskButton').disabled = true;
+    // Redirect to the admin page for now - later implementation should let it clear only one filter
+    window.location.href = '/admin'; // Replace '/admin' with the correct URL for your admin page
 
-// Reset labels filter
-document.getElementById('labelsDropdown').value = '';
-document.getElementById('assignLabelButton').disabled = true;
-document.getElementById('removeLabelButton').disabled = true;
+// // Reset task filter
+// document.getElementById('taskFilter').value = '';
+// // document.getElementById('editTaskButton').disabled = true;
+// // document.getElementById('assignTaskButton').disabled = true;
+// // document.getElementById('removeTaskButton').disabled = true;
 
-// Reset search inputs
-document.getElementById('searchInput').value = '';
-document.getElementById('searchDropdown').value = '';
+// // Reset labels filter
+// document.getElementById('labelsDropdown').value = '';
+// // document.getElementById('assignLabelButton').disabled = true;
+// // document.getElementById('removeLabelButton').disabled = true;
 
-// Show all rows
-document.querySelectorAll('tbody tr').forEach(row => {
-    row.style.display = '';
-});
-});
+// // Reset search inputs
+// document.getElementById('searchInput').value = '';
+// document.getElementById('searchDropdown').value = '';
 
-
-
-// Enable/disable "Assign Label" button based on selection
-document.getElementById('labelsDropdown').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('assignLabelButton').disabled = !selectedTask;
-});
-
-// Enable/disable "Remove Label" button based on selection
-document.getElementById('labelsDropdown').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('removeLabelButton').disabled = !selectedTask;
+// // Show all rows
+// document.querySelectorAll('tbody tr').forEach(row => {
+//     row.style.display = '';
+// });
 });
 
 
-// Enable/disable "Edit Task" button based on selection
-document.getElementById('taskFilter').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('editTaskButton').disabled = !selectedTask;
-});
+
+// // Enable/disable "Assign Label" button based on selection
+// document.getElementById('labelsDropdown').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('assignLabelButton').disabled = !selectedTask;
+// });
+
+// // Enable/disable "Remove Label" button based on selection
+// document.getElementById('labelsDropdown').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('removeLabelButton').disabled = !selectedTask;
+// });
 
 
-// Enable/disable "Assign Task" button based on selection
-document.getElementById('taskFilter').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('assignTaskButton').disabled = !selectedTask;
-});
+// // Enable/disable "Edit Task" button based on selection
+// document.getElementById('taskFilter').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('editTaskButton').disabled = !selectedTask;
+// });
 
 
-// Enable/disable "Remove Task" button based on selection
-document.getElementById('taskFilter').addEventListener('change', function () {
-    const selectedTask = this.value;
-    document.getElementById('removeTaskButton').disabled = !selectedTask;
-});
+// // Enable/disable "Assign Task" button based on selection
+// document.getElementById('taskFilter').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('assignTaskButton').disabled = !selectedTask;
+// });
+
+
+// // Enable/disable "Remove Task" button based on selection
+// document.getElementById('taskFilter').addEventListener('change', function () {
+//     const selectedTask = this.value;
+//     document.getElementById('removeTaskButton').disabled = !selectedTask;
+// });
 
 
 function applyFilters() {
     const searchBy = document.getElementById('searchDropdown').value.toLowerCase();
     const searchValue = document.getElementById('searchInput').value.toLowerCase();
-    const selectedLabel = document.getElementById('labelsDropdown').value.toLowerCase();
+    const selectedLabel = document.getElementById('tagFilter').value.toLowerCase();
     const rows = document.querySelectorAll('tbody tr');
 
     rows.forEach(row => {
@@ -107,7 +110,8 @@ function applyFilters() {
 
 // Event listeners for filters
 document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('labelsDropdown').addEventListener('change', applyFilters);
+// document.getElementById('searchDropdown').addEventListener('change', applyFilters); 
+document.getElementById('tagFilter').addEventListener('change', applyFilters);
 
 
 document.getElementById('saveLabelButton').addEventListener('click', function () {
@@ -115,35 +119,21 @@ document.getElementById('saveLabelButton').addEventListener('click', function ()
     const labelColor = document.getElementById('labelColor').value;
 
     if (labelName) {
-        // Send label data to the server via AJAX
-        fetch('/add_label', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ labelName, labelColor })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                // Add the new label to the dropdown
-                const newOption = document.createElement('option');
-                newOption.value = labelName.toLowerCase();
-                newOption.innerHTML = `<span class="badge ${labelColor}">${labelName}</span>`;
-                document.getElementById('labelsDropdown').appendChild(newOption);
+        // Create a new option for the dropdown
+        const newOption = document.createElement('option');
+        newOption.value = labelName.toLowerCase();
+        newOption.innerHTML = `<span class="badge ${labelColor}">${labelName}</span>`;
 
-                alert('Label added successfully!');
+        // Add the new option to the dropdown
+        const labelsDropdown = document.getElementById('tagFilter');
+        labelsDropdown.appendChild(newOption);
 
-                // Reset the form and close the modal
-                document.getElementById('labelForm').reset();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to add label. Please try again.');
-        });
+        // Reset the form and close the modal
+        document.getElementById('labelForm').reset();
+        const modalElement = document.getElementById('labelModal');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.hide();
+
     } else {
         alert('Please enter a label name.');
     }

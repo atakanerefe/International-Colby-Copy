@@ -10,7 +10,18 @@
     {% include 'navbar.html' %}
 
     <content class="container row mx-auto mt-4">
-        <h2 class="mb-4" id="welcome-message">Admin Dashboard</h2>
+        <!-- <h2 class="mb-4" id="welcome-message">Admin Dashboard</h2> -->
+        <div class="d-flex align-items-center justify-content-between gap-3 m-6 mt-4">
+            <!-- creating a tag label for student view that should be uneditable -->
+            <h5 class="text-start h2 mb-0"id="welcome-message">Admin Dashboard</h5>
+            <!-- <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;"> -->
+            <div class="d-flex align-items-center" studentName="{{ student.name }}">
+                <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit Task</button>
+                <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.addTask') }}">New Task</a>
+                <button class="btn btn-primary m-1" id="addLabelButton" data-bs-toggle="modal" data-bs-target="#labelModal">New Label</button>
+
+            </div>
+        </div>
         <div class="my-4 justify-content-between">
             <div class=" row mb-4">
 
@@ -27,35 +38,83 @@
                         <input type="text" class="form-control" id="searchInput" placeholder="Search...">
                         <!-- Reset Button -->
                     </div>
-                    <button class="btn btn-secondary m-1" id="resetFilters">Reset Filters</button>
-                </div>
-
-
-                <!-- Task Management Section -->
-                <div class="col-lg-4">
-                    <div>
+                    <div class="input-group m-1">
+                        <!-- Dropdown to display task options dynamically -->
+                        <select class="form-select" id="taskFilter" onchange="handleTaskSelection()">
+                            <option value="" selected>-- Filter by Task --</option>
+                            <!-- tasks will be dynamically added here via JavaScript -->
+                        </select>
+                        <!-- Dropdown to display tag options dynamically -->
+                        <select class="form-select" id="tagFilter" onchange="handleTagSelection()">
+                            <option value="" selected>-- Filter by Tag --</option>
+                            <!-- tasks will be dynamically added here via JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <!-- <div class="input-group m-1">
+                        <select class="form-select" id="tagOrTaskToggle" onchange="">
+                            <option value="" selected>-- Select Task or Tag --</option>
+                            <option value="">Filter by task</option>
+                            <option value="">Filter by tag</option>
+                        </select>       -->
                         <!-- DYNAMICALLY DISPLAY TASKS -->
-                        <select class="form-select m-1" id="taskFilter" onchange="handleTaskSelection()">
+                        <!-- <select class="form-select" id="filterType" onchange="handleTaskSelection()">
                             <option value="" selected>-- Select Task --</option>
                             {% for task in tasks %}
                                 <option value="{{ task.title }}">{{ task.title }}</option>
                             {% endfor %}
                         </select>      
-                        <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.addTask') }}">New Task</a>
-                        <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit</button>
+                    </div> -->
+                    <button class="btn btn-secondary m-1" id="resetFilters">Reset Filters</button>
+                </div> 
+                <!-- end of column ^^^ -->
+
+                <div class="col-lg-1">
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="input-group m-1">
+                        <select class="form-select" id="assignRemoveToggle" onchange="">
+                            <option value="" selected>-- Assign / Remove --</option>
+                            <option value="">Assign</option>
+                            <option value="">Remove</option>
+                        </select>      
+                        <select class="form-select" id="tagOrTask" onchange="">
+                            <option value="" selected>-- Task or Tag --</option>
+                            <option value="Task">Task</option>
+                            <option value="Tag">Tag</option>
+                        </select>      
+                        <!-- DYNAMICALLY DISPLAY TASKS -->
+                        <select class="form-select" id="assignOrRemoveItemName" onchange="">
+                            <option value="" selected>-- Select Task or Tag --</option>
+                            <!-- {% for task in tasks %}
+                                <option value="{{ task.title }}">{{ task.title }}</option>
+                            {% endfor %} -->
+                        </select>      
+                    </div>
+                    <div class="input-group m-1">
+                        <button class="btn btn-success m-1 ms-auto" id="submitAssignOrRemove" disabled>Submit</button>
+                    </div>
+                </div>
+
+
+
+
+                <!-- <div class="col-lg-1">
+                    <button class="btn btn-success m-1" id="submitAssignOrRemove" disabled>Submit</button>
+                </div> -->
+
+                <!-- Task Management Section -->
+                <!-- <div class="col-lg-4">
+                    <div>
                         <button class="btn btn-success m-1" id="assignTaskButton" disabled>Assign</button>
                         <button class="btn btn-danger m-1" id="removeTaskButton" disabled>Remove</button>
                     </div>
-                </div>
+                </div> -->
                 
-        
-                
-            
-
-            
             
                 <!-- Labels Management Section -->
-                <div class="col-lg-4">
+                <!-- <div class="col-lg-4">
                     <div>
                         <select class="form-select m-1" id="labelsDropdown">
                             <option value="" selected>-- Select Label --</option>
@@ -63,11 +122,11 @@
                             <option value="Co'26"><span class="badge bg-success m-1">Co'26</span></option>
                             <option value="OPT"><span class="badge bg-warning text-dark">OPT</span></option>
                         </select>
-                        <button class="btn btn-primary m-1" id="addLabelButton" data-bs-toggle="modal" data-bs-target="#labelModal">New Label</button>
+                        
                         <button class="btn btn-success m-1" id="assignLabelButton" disabled>Assign</button>    
                         <button class="btn btn-danger m-1" id="removeLabelButton" disabled>Remove</button>    
                     </div>                        
-                </div>
+                </div> -->
             </div>
             
             <!-- Modal for Adding Labels -->
@@ -160,6 +219,8 @@
     <!-- <script src="{{ url_for('static', filename='adminPageStudentProgress.js') }}"></script> -->
     <script src="../static/allStudentsFilter.js"></script>
     <!-- <script src="{{ url_for('static', filename='allStudentsFilter.js') }}"></script> -->
+    <!-- <script src="../static/studentDashboardTags.js"></script> -->
+    <script src="../static/filterDropdown.js"></script>
 
 </body>
 
