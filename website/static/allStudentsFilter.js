@@ -6,17 +6,20 @@ const checkboxes = document.querySelectorAll('.row-checkbox');
 checkboxes.forEach(checkbox => checkbox.checked = this.checked);
 });
 
-// document.getElementById('resetFilters').addEventListener('click', function () {
+document.getElementById('resetFilters').addEventListener('click', function () {
+    // Redirect to the admin page for now - later implementation should let it clear only one filter
+    window.location.href = '/admin'; // Replace '/admin' with the correct URL for your admin page
+
 // // Reset task filter
 // document.getElementById('taskFilter').value = '';
-// document.getElementById('editTaskButton').disabled = true;
-// document.getElementById('assignTaskButton').disabled = true;
-// document.getElementById('removeTaskButton').disabled = true;
+// // document.getElementById('editTaskButton').disabled = true;
+// // document.getElementById('assignTaskButton').disabled = true;
+// // document.getElementById('removeTaskButton').disabled = true;
 
 // // Reset labels filter
 // document.getElementById('labelsDropdown').value = '';
-// document.getElementById('assignLabelButton').disabled = true;
-// document.getElementById('removeLabelButton').disabled = true;
+// // document.getElementById('assignLabelButton').disabled = true;
+// // document.getElementById('removeLabelButton').disabled = true;
 
 // // Reset search inputs
 // document.getElementById('searchInput').value = '';
@@ -26,7 +29,7 @@ checkboxes.forEach(checkbox => checkbox.checked = this.checked);
 // document.querySelectorAll('tbody tr').forEach(row => {
 //     row.style.display = '';
 // });
-// });
+});
 
 
 
