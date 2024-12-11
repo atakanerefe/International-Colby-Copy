@@ -4,6 +4,12 @@ function addStep(stepList) {
     // Clear input fields in the new step
     newStep.querySelectorAll("input, textarea").forEach(input => input.value = "");
 
+    // Ensure unique names for step_title and step_content fields
+    const subtaskIndex = Array.from(stepList.closest('li').parentElement.children).indexOf(stepList.closest('li'));
+    const stepIndex = stepList.children.length;
+    newStep.querySelector("input[name^='step_title']").name = `step_title[${subtaskIndex}][]`;
+    newStep.querySelector("textarea[name^='step_content']").name = `step_content[${subtaskIndex}][]`;
+
     stepList.appendChild(newStep);
 
     // Update the labels with numbering
@@ -35,11 +41,11 @@ function addSubtask() {
     initialStep.innerHTML = `
         <div class="form-group fs-5 mb-4">
             <label>Step Title:</label>
-            <input type="text" class="form-control" placeholder="Enter step title">
+            <input type="text" name="step_title[${subtaskList.children.length}][]" class="form-control" placeholder="Enter step title">
         </div>
         <div class="form-group mb-3">
             <label>Step Content:</label>
-            <textarea class="form-control" rows="3"></textarea>
+            <textarea name="step_content[${subtaskList.children.length}][]" class="form-control" rows="3" placeholder="Enter step content"></textarea>
         </div>
     `;
     stepList.appendChild(initialStep);
@@ -53,6 +59,7 @@ function addSubtask() {
     // Update the labels with numbering
     updateLabels();
 }
+
 
 function deleteSubtask() {
     const subtaskList = document.getElementById("subtask-list");
