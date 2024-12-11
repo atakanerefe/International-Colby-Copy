@@ -68,9 +68,9 @@ def steps():
 @main_blueprint.route('/admin')
 @login_required
 def admin():
-
+    student = User.query.filter_by(email=current_user.email).first()
     # DYNAMICALLY DISPLAY TASKS FOR FUTURE USE
-    return render_template('allStudents.html', tasks=Task.query.all())
+    return render_template('allStudents.html', tasks=Task.query.all(), student=student)
     # return render_template('allStudents.html')
 
 @main_blueprint.route('/admin/addTask')
