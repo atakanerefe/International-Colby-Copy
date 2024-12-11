@@ -19,16 +19,9 @@
                 <p class="card-text">
                 <i class="{{'fa-solid fa-lock-open mt-4' if subtask_progress[subtask] == 'complete' else 'fa-solid fa-lock mt-4'}}" 
                    style="color:{{'green' if subtask_progress[subtask] == 'complete' else 'red'}}";></i></p>
-                <a class="btn btn-primary mt-3" href="{{url_for ('main.steps')}}">Begin</a>
+                <a class="btn btn-primary mt-3" href="{{url_for ('main.steps', subtask_id=subtask.id)}}">Begin</a>
             </div>
         </div>
-        <!-- <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;">
-            <div class="card-body">
-                <h5 class="card-title">Sub-Task 2</h5>
-                <p class="card-text"><i class="fa-solid fa-lock mt-4" style="color: red;"></i></p>
-                <a class="btn btn-primary mt-3" href="{{url_for ('main.steps')}}">Preview</a>
-            </div>
-        </div> -->
         {% endfor %}
     </content>
 
