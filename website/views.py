@@ -72,6 +72,33 @@ def admin():
     # DYNAMICALLY DISPLAY TASKS FOR FUTURE USE
     return render_template('allStudents.html', tasks=Task.query.all(), student=student)
     # return render_template('allStudents.html')
+    
+    
+@main_blueprint.route('/add_label', methods=['POST'])
+@login_required
+def add_label():
+    label_name = request.json.get('labelName')
+    label_color = request.json.get('labelColor')
+
+    # Check if label name and color are provided
+    if not label_name or not label_color:
+        return jsonify({'error': 'Invalid input'}), 400
+
+    # Check if the label already exists
+    existing_label = Tag.query.filter_by(name=label_name).first()
+    if existing_label:
+        return jsonify({'error': 'Label already exists'}), 400
+
+    # Create a new label and save to the database
+    new_label = Tag(name=label_name, html_class=label_color)
+    db.session.add(new_label)
+    db.session.commit()
+
+    return jsonify({'message': 'Label added successfully', 'label': {
+        'name': label_name,
+        'html_class': label_color
+    }}), 200
+
 
 @main_blueprint.route('/admin/addTask')
 @login_required

@@ -114,7 +114,6 @@ document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('tagFilter').addEventListener('change', applyFilters);
 
 
-// The New Label Menu
 document.getElementById('saveLabelButton').addEventListener('click', function () {
     const labelName = document.getElementById('labelName').value.trim();
     const labelColor = document.getElementById('labelColor').value;
@@ -139,6 +138,7 @@ document.getElementById('saveLabelButton').addEventListener('click', function ()
         alert('Please enter a label name.');
     }
 });
+
 
 document.getElementById('labelModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('labelForm').reset();
