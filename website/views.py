@@ -59,11 +59,27 @@ def subtask(task_id):
         subtask_progress[subtask] = getSubtaskStatusByProgress(subtask)
     return render_template('subtask.html', subtasks=subtasks, subtask_progress=subtask_progress)
 
-@main_blueprint.route('/steps')
+@main_blueprint.route('/steps/<int:subtask_id>')
 @login_required
-def steps():
-    step = request.args.get('step', default=1, type=int)
-    return render_template('steps.html', active_step=step)
+def steps(subtask_id):
+    step_objects = Step.query.filter_by(subtask_id=subtask_id).all()
+    steps = [{"id": step.id, "title": step.title, "content": step.content, 
+              "subtask_id": step.subtask_id} for step in step_objects]
+    return render_template('steps.html', active_step=1, steps=steps)
+
+@main_blueprint.route('/progress/<int:subtask_id>')
+@login_required
+def progress(subtask_id):
+    # get the progress object for the user and subtask
+    progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask_id).first()
+    if not progress:
+        return "Progress not found", 404
+
+    # update the progress
+    progress.complete = True
+    db.session.commit()
+
+    return redirect(url_for('main.subtask', task_id=progress.task_id))
 
 @main_blueprint.route('/admin')
 @login_required
@@ -409,13 +425,33 @@ def add_sample_data():
         {"title": "Bla Bla Bla 3", "content": "Bla Bla Bla 3"},
     ]
 
+    steps_data = [
+        {"title": "Step 1", "content": "Bsdkfmksdf"},
+        {"title": "Step 2", "content": "sdv,sdlvsd"},
+        {"title": "Step 3", "content": "sdvkmsdmfmg"},
+        {"title": "Step 4", "content": "grekmtmrkey"},
+        {"title": "Step 5", "content": "sef,k,lrdkg"},
+    ]
+
     subtasks = []
+    steps = []
     for subtask_data in subtasks_data:
         subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
+
         if not subtask:
             subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], task_id=task.id)
             db.session.add(subtask)
             subtasks.append(subtask)
+    
+    for subtask in subtasks:
+        for step_data in steps_data:
+            step = Step.query.filter_by(title=step_data["title"], subtask_id=subtask.id).first()
+            if not step:
+                step = Step(title=step_data["title"], content=step_data["content"], subtask_id=subtask.id, progress=0)
+                db.session.add(step)
+                steps.append(step)
+
+        
     db.session.commit()
 
     # Track progress for each user on the same task
