@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for
 from flask import request
 from website import db
-from .models import Progress, Subtask, User, Task, Step, user_task_association_table
+from .models import Progress, Subtask, User, Task, Step, Tag, user_task_association_table, user_tag_association_table
 from flask_login import login_required, current_user
 from datetime import datetime
 
@@ -43,8 +43,11 @@ def home():
 @main_blueprint.route('/task')
 @login_required
 def task():
+    student = User.query.filter_by(email=current_user.email).first()
+    if not student:
+        return "Student not found", 404
     tasks = run_get_tasks_by_email(current_user.email)
-    return render_template('task.html', tasks=tasks)
+    return render_template('task.html', tasks=tasks, student=student)
 
 @main_blueprint.route('/subtask/<int:task_id>')
 @login_required
@@ -119,6 +122,24 @@ def get_students_by_task():
         })
 
     return jsonify({'students': students_data})
+
+@main_blueprint.route('/get_tags_for_student')
+def get_tags_for_student():
+    student_name = request.args.get('student')
+
+    # Fetch the student
+    student = User.query.filter_by(name=student_name).first()
+
+    if not student:
+        return jsonify({'error': 'Student not found'}), 404
+
+    # Fetch all users assigned to this task using the user_task_association_table
+    # students = User.query.join(user_task_association_table).join(Task).filter(Task.id == task.id).all()
+    tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == student.id).all()
+    serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
+
+    return jsonify({'tags': serialized_tags})
+
 
 @main_blueprint.route('/get_tasks_by_email')
 def get_tasks_by_email():
@@ -297,6 +318,7 @@ def add_sample_data():
 
     # Check if the user-task association already exists before adding
     existing_users_in_task = set(user.id for user in task.users)  # Set of user IDs already associated with this task
+    # print("task existing users: ", existing_users_in_task)
     users_to_add = [user for user in users if user.id not in existing_users_in_task]
 
     if users_to_add:
@@ -304,6 +326,25 @@ def add_sample_data():
         for user in users_to_add:
             task.users.append(user)
         db.session.commit()
+
+    # repeat for task2 =====================================================
+    task2 = Task.query.filter_by(title="Get Social Security Number").first()
+    if not task2:
+        task2 = Task(title="Get Social Security Number", content="This is a second sample task.")
+        db.session.add(task2)
+        db.session.commit()
+
+    existing_users_in_task2 = set(user.id for user in task2.users) 
+    # print("task2 existing users: ", existing_users_in_task2)
+    user_to_add_task2 = User.query.filter_by(name="Tricia").first()
+    # print("Tricia to add: ", user_to_add_task2)
+
+    if user_to_add_task2:
+        if user_to_add_task2.id not in existing_users_in_task2:
+            # Add users who are not yet associated with the task
+            task2.users.append(user_to_add_task2)
+        db.session.commit()
+
 
     # Create subtasks and assign them to the task
     subtasks_data = [
@@ -341,3 +382,44 @@ def add_sample_data():
                 progress = Progress(complete=complete, user_id=user.id, subtask_id=subtask.id, task_id=task.id)
                 db.session.add(progress)
     db.session.commit()
+
+    # creating tags uniquely =====================================================
+    # TAG 1
+    tag1 = Tag.query.filter_by(name="tag1").first()
+    if not tag1:
+        tag1 = Tag(name="tag1", html_class="bg-warning")
+        db.session.add(tag1)
+        db.session.commit()
+
+    # TAG 2
+    tag2 = Tag.query.filter_by(name="tag2").first()
+    if not tag2:
+        tag2 = Tag(name="tag2", html_class="bg-warning")
+        db.session.add(tag2)
+        db.session.commit()
+
+    # assign to two users
+    existing_users_with_tag1 = set(user.id for user in tag1.users) 
+    existing_users_with_tag2 = set(user.id for user in tag2.users) 
+    # print("task2 existing users: ", existing_users_in_task2)
+    user1_to_add_tag1 = User.query.filter_by(name="Tricia").first()
+    user2_to_add_tag1 = User.query.filter_by(name="Owen").first()
+    user1_to_add_tag2 = User.query.filter_by(name="Tricia").first()
+    # print("Tricia to add: ", user_to_add_task2)
+
+    if user1_to_add_tag1:
+        if user1_to_add_tag1.id not in existing_users_with_tag1:
+            # Add users who are not yet associated with the task
+            tag1.users.append(user1_to_add_tag1)
+            db.session.commit()
+    
+    if user2_to_add_tag1:
+        if user2_to_add_tag1.id not in existing_users_with_tag1:
+            tag1.users.append(user2_to_add_tag1)
+            db.session.commit()
+    
+    if user1_to_add_tag2:
+        if user1_to_add_tag2.id not in existing_users_with_tag2:
+            # Add users who are not yet associated with the task
+            tag2.users.append(user1_to_add_tag2)
+            db.session.commit()

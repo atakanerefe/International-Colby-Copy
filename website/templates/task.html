@@ -8,23 +8,38 @@
 
 <body>
     {% include 'navbar.html' %}
-
+    
     <content class="container row mx-auto mt-4">
-        <h5 class="text-center h2 pb-4">Tasks</h5>
+        <div class="d-flex align-items-center justify-content-between gap-3 m-6 mt-4">
+            <!-- creating a tag label for student view that should be uneditable -->
+            <h5 class="text-start h2 mb-0">Welcome, {{ student.name }}!</h5>
+            <!-- <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;"> -->
+            <div class="d-flex align-items-center gap-2 flex-wrap" id="tagsContainer" studentName="{{ student.name }}">
+                <!-- <div class="mr-auto p-2">Your tags:</div> -->
+                <!-- Tags piled to the right -->
+                <!-- Dynamically populated tags will go here -->
+            </div>
+        </div>
 
-        {% for task in tasks: %}
-        <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;">
-            <div class="card-body">
-                <h5 class="card-title">{{ task.title }}</h5>
-                <p class="card-text">Deadline</p>
-                <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: {{ task.progress.percent }}%">{{ task.progress.completed }} / {{ task.progress.total }}</div>
+        <content class="container row mx-auto mt-4">
+            {% for task in tasks: %}
+            <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;">
+                <div class="card-body" id="task-card">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text">Deadline</p>
+                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: {{ task.progress.percent }}%">{{ task.progress.completed }} / {{ task.progress.total }}</div>
+                    </div>
+                    <!-- Add argument to subtask URL to send info on task-->
+                    <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask')}}">Begin</a>
                 </div>
                 <!-- Add argument to subtask URL to send info on task-->
                 <a class="btn btn-primary mt-4" href="{{url_for ('main.subtask', task_id=task.id)}}">Begin</a>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
+        </content>
     </content>
+
+    <script src="../static/studentDashboardTags.js"></script>
 
 </body>
