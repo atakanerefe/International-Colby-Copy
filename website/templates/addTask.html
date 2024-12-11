@@ -34,14 +34,14 @@
                         <ul class="list-group step-list">
                           <li class="list-group-item">
                             <div class="form-group fs-5 mb-4">
-                              <label>Step Title:</label>
-                              <input type="text" name="step_title[0][]" class="form-control" placeholder="Setup your Workday account">
+                                <label>Step Title:</label>
+                                <input type="text" name="step_title[0][]" class="form-control" placeholder="Enter step title">
                             </div>
                             <div class="form-group mb-3">
-                              <label>Step Content:</label>
-                              <textarea class="form-control" rows="3"></textarea>
+                                <label>Step Content:</label>
+                                <textarea name="step_content[0][]" class="form-control" rows="3" placeholder="Enter step content"></textarea>
                             </div>
-                          </li>
+                        </li>                                      
                         </ul>
                         <button type="button" class="btn btn-success add-step-btn mt-2" onclick="addStep(this.closest('.list-group-item').querySelector('.step-list'))">Add Step</button>
                         <button type="button" class="btn btn-danger delete-step-btn mt-2" onclick="deleteStep(this.closest('.list-group-item').querySelector('.step-list'))">Delete Step</button>
