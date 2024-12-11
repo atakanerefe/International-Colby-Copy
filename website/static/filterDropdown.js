@@ -22,10 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 
         } else if (selectedValue === 'Tag') {
             fetchOptions('/get_tags')
-                .then(tags => populateDropdown(filterType, tags, '-- Select Tag --'));
+            .then(tags => {
+                console.log('Fetched tags:', tags);
+                populateDropdown(filterType, tags, '-- Select Tag --');
+            })
         } else {
             // Clear the second dropdown if no valid selection
-            clearDropdown(filterType, '-- select task or tag --');
+            clearDropdown(filterType, '-- Select Task or Tag --');
         }
     });
 });
