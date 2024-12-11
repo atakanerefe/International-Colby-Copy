@@ -2,8 +2,6 @@
 <html lang="en">
 <head>
     {% include 'bootstrapStarter.html' %}
-
-    <title>Colby International Office Form Helper</title>
 </head>
 
 <body>
@@ -15,9 +13,9 @@
                 <div class="col-md-2">
                     <ul class="list-group">
                       <!-- vertical sidebar with hardcoded length of subtask -->
-                        {% for i in range(1, 7) %}
-                            <li class="list-group-item {% if i == active_step %}active{% endif %}">
-                                {{ i }}
+                        {% for i in range(1,steps|length+1) %}
+                            <li class="list-group-item {% if i == active_step %}active{% endif %}" 
+                                id="step-{{ i }}">{{ i }}
                             </li>
                         {% endfor %}
                     </ul>
@@ -25,32 +23,39 @@
     
                 <div class="col-md-10">
                   <!-- card for the subtask content -->
-                    <div class="card mb-4">
+                    <div class="card mb-4" id="step-card">
                         <div class="card-header">Step {{ active_step }}</div>
                         <div class="card-body">
                             <h5 class="card-title">Step Description Title for Step {{ active_step }}</h5>
                             <p class="card-text">Detailed description of step {{ active_step }} goes here...</p>
                         </div>
                     </div>
+
+                    <input type="hidden" id="steps-data" value='{{ steps|tojson }}'>
+                    <input type="hidden" id="active-step-data" value="{{ active_step }}">
     
                     <div class="d-flex justify-content-center mt-4">
-                      <!-- previous button -->
-                        {% if active_step > 1 %}
-                            <a href="{{ url_for('main.steps', step=active_step - 1) }}" class="btn btn-dark">Previous</a>
-                        {% endif %}
-                        <!-- next button with hardcoded value cuz don't have length of subtask -->
-                        {% if active_step < 6 %}
-                            <a href="{{ url_for('main.steps', step=active_step + 1) }}" class="btn btn-dark ml-2">Next</a>
-                        {% endif %}
-                        <!-- submit button -->
-                        {% if active_step == 6 %}
-                            <a href="{{ url_for('main.steps', step=active_step + 1) }}" class="btn btn-dark ml-2">Submit</a>
-                        {% endif %}
+
+                        <a style="display: none" href="#" onclick="decrementStep()" class="btn btn-dark" id="previous-btn">Previous</a>
+
+                        <a style="display: block" href='#' onclick="incrementStep()" class="btn btn-dark ml-2" id="next-btn">Next</a>
+
+                        <a style="display: none" href="{{ url_for('main.progress', subtask_id=steps[0]['subtask_id']) }}" class="btn btn-dark ml-2" id="submit-btn">Submit</a>
     
                     </div>
                 </div>
             </div>
         </div>
     </content>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous">
+    </script>
+
+    <script src="{{ url_for('static', filename='changeStep.js') }}"></script>
+
 </body>
+
+
 </html>
