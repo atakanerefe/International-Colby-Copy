@@ -110,31 +110,45 @@ document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('labelsDropdown').addEventListener('change', applyFilters);
 
 
-// The New Label Menu
 document.getElementById('saveLabelButton').addEventListener('click', function () {
     const labelName = document.getElementById('labelName').value.trim();
     const labelColor = document.getElementById('labelColor').value;
 
     if (labelName) {
-        // Create a new option for the dropdown
-        const newOption = document.createElement('option');
-        newOption.value = labelName.toLowerCase();
-        newOption.innerHTML = `<span class="badge ${labelColor}">${labelName}</span>`;
+        // Send label data to the server via AJAX
+        fetch('/add_label', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ labelName, labelColor })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                // Add the new label to the dropdown
+                const newOption = document.createElement('option');
+                newOption.value = labelName.toLowerCase();
+                newOption.innerHTML = `<span class="badge ${labelColor}">${labelName}</span>`;
+                document.getElementById('labelsDropdown').appendChild(newOption);
 
-        // Add the new option to the dropdown
-        const labelsDropdown = document.getElementById('labelsDropdown');
-        labelsDropdown.appendChild(newOption);
+                alert('Label added successfully!');
 
-        // Reset the form and close the modal
-        document.getElementById('labelForm').reset();
-        const modalElement = document.getElementById('labelModal');
-        const modal = new bootstrap.Modal(modalElement);
-        modal.hide();
-
+                // Reset the form and close the modal
+                document.getElementById('labelForm').reset();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to add label. Please try again.');
+        });
     } else {
         alert('Please enter a label name.');
     }
 });
+
 
 document.getElementById('labelModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('labelForm').reset();
