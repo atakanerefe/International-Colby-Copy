@@ -4,11 +4,15 @@ function addStep(stepList) {
     // Clear input fields in the new step
     newStep.querySelectorAll("input, textarea").forEach(input => input.value = "");
 
-    // Ensure unique names for step_title and step_content fields
+    // Determine the subtask index dynamically
     const subtaskIndex = Array.from(stepList.closest('li').parentElement.children).indexOf(stepList.closest('li'));
+
+    // Update the step index dynamically
     const stepIndex = stepList.children.length;
-    newStep.querySelector("input[name^='step_title']").name = `step_title[${subtaskIndex}][]`;
-    newStep.querySelector("textarea[name^='step_content']").name = `step_content[${subtaskIndex}][]`;
+
+    // Ensure unique names for step_title and step_content fields
+    newStep.querySelector("input[name^='step_title']").name = `step_title[${subtaskIndex}][${stepIndex}]`;
+    newStep.querySelector("textarea[name^='step_content']").name = `step_content[${subtaskIndex}][${stepIndex}]`;
 
     stepList.appendChild(newStep);
 
@@ -36,19 +40,21 @@ function addSubtask() {
     stepList.innerHTML = ""; // Clear all existing steps
 
     // Create a fresh, blank step for the new subtask
+    const subtaskIndex = subtaskList.children.length;
     const initialStep = document.createElement("li");
     initialStep.className = "list-group-item";
     initialStep.innerHTML = `
         <div class="form-group fs-5 mb-4">
             <label>Step Title:</label>
-            <input type="text" name="step_title[${subtaskList.children.length}][]" class="form-control" placeholder="Enter step title">
+            <input type="text" name="step_title[${subtaskIndex}][0]" class="form-control" placeholder="Enter step title">
         </div>
         <div class="form-group mb-3">
             <label>Step Content:</label>
-            <textarea name="step_content[${subtaskList.children.length}][]" class="form-control" rows="3" placeholder="Enter step content"></textarea>
+            <textarea name="step_content[${subtaskIndex}][0]" class="form-control" rows="3" placeholder="Enter step content"></textarea>
         </div>
     `;
     stepList.appendChild(initialStep);
+
 
     // Update buttons to call addStep and deleteStep with the specific step list
     newSubtask.querySelector(".add-step-btn").onclick = () => addStep(stepList);
@@ -59,6 +65,7 @@ function addSubtask() {
     // Update the labels with numbering
     updateLabels();
 }
+
 
 
 function deleteSubtask() {

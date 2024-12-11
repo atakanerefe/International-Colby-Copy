@@ -217,10 +217,10 @@ def addTaskToDatabase():
     task_name = request.form.get('task_name')
     deadline_str = request.form.get('deadline')
     subtask_titles = request.form.getlist('subtask_title[]')
+
+    # Parse steps grouped by subtask index
     step_titles = {}
     step_contents = {}
-
-    # Parse step titles and contents by subtask index
     for key, value in request.form.items():
         if key.startswith('step_title['):
             subtask_index = int(key.split('[')[1].split(']')[0])
@@ -238,17 +238,17 @@ def addTaskToDatabase():
     db.session.commit()
 
     # Create subtasks and steps
-    for i, subtask_title in enumerate(subtask_titles):
+    for subtask_index, subtask_title in enumerate(subtask_titles):
         subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}", task_id=task.id)
         db.session.add(subtask)
         db.session.commit()
 
         # Add all steps for the current subtask
-        if i in step_titles and i in step_contents:
-            for step_title, step_content in zip(step_titles[i], step_contents[i]):
+        if subtask_index in step_titles and subtask_index in step_contents:
+            for title, content in zip(step_titles[subtask_index], step_contents[subtask_index]):
                 step = Step(
-                    title=step_title,
-                    content=step_content,
+                    title=title,
+                    content=content,
                     subtask_id=subtask.id,
                     progress=0
                 )
@@ -265,6 +265,7 @@ def addTaskToDatabase():
     db.session.commit()
 
     return redirect(url_for('main.admin'))
+
 
 def add_sample_data():
     pass
