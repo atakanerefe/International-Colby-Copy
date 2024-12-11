@@ -110,6 +110,7 @@ function applyFilters() {
 
 // Event listeners for filters
 document.getElementById('searchInput').addEventListener('input', applyFilters);
+// document.getElementById('searchDropdown').addEventListener('change', applyFilters); 
 document.getElementById('tagFilter').addEventListener('change', applyFilters);
 
 
