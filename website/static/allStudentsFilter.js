@@ -6,68 +6,68 @@ const checkboxes = document.querySelectorAll('.row-checkbox');
 checkboxes.forEach(checkbox => checkbox.checked = this.checked);
 });
 
-document.getElementById('resetFilters').addEventListener('click', function () {
-// Reset task filter
-document.getElementById('taskFilter').value = '';
-document.getElementById('editTaskButton').disabled = true;
-document.getElementById('assignTaskButton').disabled = true;
-document.getElementById('removeTaskButton').disabled = true;
+// document.getElementById('resetFilters').addEventListener('click', function () {
+// // Reset task filter
+// document.getElementById('taskFilter').value = '';
+// document.getElementById('editTaskButton').disabled = true;
+// document.getElementById('assignTaskButton').disabled = true;
+// document.getElementById('removeTaskButton').disabled = true;
 
-// Reset labels filter
-document.getElementById('labelsDropdown').value = '';
-document.getElementById('assignLabelButton').disabled = true;
-document.getElementById('removeLabelButton').disabled = true;
+// // Reset labels filter
+// document.getElementById('labelsDropdown').value = '';
+// document.getElementById('assignLabelButton').disabled = true;
+// document.getElementById('removeLabelButton').disabled = true;
 
-// Reset search inputs
-document.getElementById('searchInput').value = '';
-document.getElementById('searchDropdown').value = '';
+// // Reset search inputs
+// document.getElementById('searchInput').value = '';
+// document.getElementById('searchDropdown').value = '';
 
-// Show all rows
-document.querySelectorAll('tbody tr').forEach(row => {
-    row.style.display = '';
-});
-});
-
-
-
-// Enable/disable "Assign Label" button based on selection
-document.getElementById('labelsDropdown').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('assignLabelButton').disabled = !selectedTask;
-});
-
-// Enable/disable "Remove Label" button based on selection
-document.getElementById('labelsDropdown').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('removeLabelButton').disabled = !selectedTask;
-});
+// // Show all rows
+// document.querySelectorAll('tbody tr').forEach(row => {
+//     row.style.display = '';
+// });
+// });
 
 
-// Enable/disable "Edit Task" button based on selection
-document.getElementById('taskFilter').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('editTaskButton').disabled = !selectedTask;
-});
+
+// // Enable/disable "Assign Label" button based on selection
+// document.getElementById('labelsDropdown').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('assignLabelButton').disabled = !selectedTask;
+// });
+
+// // Enable/disable "Remove Label" button based on selection
+// document.getElementById('labelsDropdown').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('removeLabelButton').disabled = !selectedTask;
+// });
 
 
-// Enable/disable "Assign Task" button based on selection
-document.getElementById('taskFilter').addEventListener('change', function () {
-const selectedTask = this.value;
-document.getElementById('assignTaskButton').disabled = !selectedTask;
-});
+// // Enable/disable "Edit Task" button based on selection
+// document.getElementById('taskFilter').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('editTaskButton').disabled = !selectedTask;
+// });
 
 
-// Enable/disable "Remove Task" button based on selection
-document.getElementById('taskFilter').addEventListener('change', function () {
-    const selectedTask = this.value;
-    document.getElementById('removeTaskButton').disabled = !selectedTask;
-});
+// // Enable/disable "Assign Task" button based on selection
+// document.getElementById('taskFilter').addEventListener('change', function () {
+// const selectedTask = this.value;
+// document.getElementById('assignTaskButton').disabled = !selectedTask;
+// });
+
+
+// // Enable/disable "Remove Task" button based on selection
+// document.getElementById('taskFilter').addEventListener('change', function () {
+//     const selectedTask = this.value;
+//     document.getElementById('removeTaskButton').disabled = !selectedTask;
+// });
 
 
 function applyFilters() {
     const searchBy = document.getElementById('searchDropdown').value.toLowerCase();
     const searchValue = document.getElementById('searchInput').value.toLowerCase();
-    const selectedLabel = document.getElementById('labelsDropdown').value.toLowerCase();
+    const selectedLabel = document.getElementById('tagFilter').value.toLowerCase();
     const rows = document.querySelectorAll('tbody tr');
 
     rows.forEach(row => {
@@ -107,7 +107,7 @@ function applyFilters() {
 
 // Event listeners for filters
 document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('labelsDropdown').addEventListener('change', applyFilters);
+document.getElementById('tagFilter').addEventListener('change', applyFilters);
 
 
 // The New Label Menu
@@ -122,7 +122,7 @@ document.getElementById('saveLabelButton').addEventListener('click', function ()
         newOption.innerHTML = `<span class="badge ${labelColor}">${labelName}</span>`;
 
         // Add the new option to the dropdown
-        const labelsDropdown = document.getElementById('labelsDropdown');
+        const labelsDropdown = document.getElementById('tagFilter');
         labelsDropdown.appendChild(newOption);
 
         // Reset the form and close the modal

@@ -134,11 +134,38 @@ def get_tags_for_student():
         return jsonify({'error': 'Student not found'}), 404
 
     # Fetch all users assigned to this task using the user_task_association_table
-    # students = User.query.join(user_task_association_table).join(Task).filter(Task.id == task.id).all()
     tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == student.id).all()
     serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
 
     return jsonify({'tags': serialized_tags})
+
+
+@main_blueprint.route('/get_tags')
+def get_tags():
+    # Fetch all tags
+    tags = Tag.query.all()
+
+    if not tags:
+        return jsonify({'error': 'Tag not found'}), 404
+
+    # Serialize tags
+    serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
+
+    return jsonify({'tags': serialized_tags})
+
+
+@main_blueprint.route('/get_tasks')
+def get_tasks():
+    # Fetch all tasks
+    tasks = Task.query.all()
+
+    if not tasks:
+        return jsonify({'error': 'Task not found'}), 404
+
+    # Serialize tasks
+    serialized_tasks = [{'title': task.title} for task in tasks]
+
+    return jsonify({'tasks': serialized_tasks})
 
 
 @main_blueprint.route('/get_tasks_by_email')
