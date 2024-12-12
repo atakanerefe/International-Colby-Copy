@@ -47,6 +47,8 @@ def task():
     if not student:
         return "Student not found", 404
     tasks = run_get_tasks_by_email(current_user.email)
+    for task in tasks:
+        print(task["title"])
     return render_template('task.html', tasks=tasks, student=student)
 
 @main_blueprint.route('/subtask/<int:task_id>')
@@ -244,7 +246,7 @@ def run_get_tasks_by_email(email, js_call=False):
         progress_percent = (completed_subtasks / len(subtasks)) * 100 if len(subtasks) > 0 else 0
 
         task = Task.query.filter_by(id=task_id).first()
-
+        
         tasks_data.append({
             'title': task.title,
             'content': task.content,
@@ -604,4 +606,20 @@ def add_task_ssn_application():
                     progress=0
                 )
                 db.session.add(step)
+    db.session.commit()
+    
+    # Track progress for the user "Owen" on the new task 
+    progress_data = [ 
+                     {"user": user_owen, "subtasks_completed": [1, 2]} # Example: Owen has completed subtasks 1 and 2 
+                     ] 
+    
+    # For each user, create progress records for their respective subtasks 
+    for progress_entry in progress_data: 
+        user = progress_entry["user"] 
+        for i, subtask in enumerate(subtasks): 
+            progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first() 
+            if not progress: 
+                complete = True if (i + 1) in progress_entry["subtasks_completed"] else False 
+                progress = Progress(complete=complete, user_id=user.id, subtask_id=subtask.id, task_id=task.id) 
+                db.session.add(progress) 
     db.session.commit()
