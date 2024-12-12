@@ -142,7 +142,7 @@ def test_remove_user_task(test_client):
     """
     with test_client.application.app_context():
         user = User.query.filter_by(email="test_user1@example.com").first()
-        task = Task.query.filter_by(title="Task 1").first()
+        task = Task.query.filter_by(title="Task 11").first()
 
         user.tasks.append(task)
         user.tasks.remove(task)
