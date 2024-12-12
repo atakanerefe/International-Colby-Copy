@@ -25,9 +25,9 @@ def test_client():
 
 
 @pytest.fixture(scope="function")
-def init_database(testing_client):
+def init_database(test_client):
     """Initialize the database with test data."""
-    with testing_client.application.app_context():
+    with test_client.application.app_context():
 
         db.session.query(Progress).delete()
         db.session.query(Step).delete()
