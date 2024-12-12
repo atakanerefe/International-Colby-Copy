@@ -15,7 +15,7 @@
             <!-- creating a tag label for student view that should be uneditable -->
             <h5 class="text-start h2 mb-0"id="welcome-message">Admin Dashboard</h5>
             <!-- <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;"> -->
-            <div class="d-flex align-items-center" studentName="{{ student.name }}">
+            <div class="d-flex align-items-center">
                 <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit Task</button>
                 <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.add_task') }}">New Task</a>
                 <button class="btn btn-primary m-1" id="addLabelButton" data-bs-toggle="modal" data-bs-target="#labelModal">New Tag</button>
@@ -212,28 +212,23 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
+                        {% for student in students %}
                         <tr>
                             <td><input type="checkbox" class="row-checkbox" /></td>
-                            <td>11111</td>
-                            <td>Student</td>
-                            <td>Example</td>
-                            <td>student@colby.edu</td>
-                            <td><span class="badge bg-success m-1">Co'26</span><span class="badge bg-warning text-dark">OPT</span></td>
+                            <td>{{ student.student_id }}</td>
+                            <td>{{ student.name.split(' ')[0] }}</td>
+                            <td>{{ student.name.split(' ')[1] }}</td>
+                            <td>{{ student.email }}</td>
                             <td>
-                                <a href="">2/2</a>
+                                {% for tag in student.tags %}
+                                    <span class="badge {{ tag.html_class }} m-1">{{ tag.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="">0/0</a>
                             </td>
                         </tr>
-                        <tr>
-                            <td><input type="checkbox" class="row-checkbox" /></td>
-                            <td>434343</td>
-                            <td>Atakan</td>
-                            <td>Erefe</td>
-                            <td>aerefe26@colby.edu</td>
-                            <td><span class="badge bg-success m-1">Co'25</span></td>
-                            <td>
-                                <a href="">3/5</a>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
