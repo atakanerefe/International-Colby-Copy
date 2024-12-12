@@ -62,8 +62,8 @@
                     <div class="input-group m-1">
                         <select class="form-select" id="assignRemoveToggle" onchange="">
                             <option value="" selected>-- Assign / Remove --</option>
-                            <option value="">Assign</option>
-                            <option value="">Remove</option>
+                            <option value="Assign">Assign</option>
+                            <option value="Remove">Remove</option>
                         </select>      
                         <select class="form-select" id="tagOrTask" onchange="">
                             <option value="" selected>-- Task or Tag --</option>
@@ -78,78 +78,9 @@
                     <div class="input-group m-1">
                         <!-- <button class="btn btn-success m-1 ms-auto" id="submitAssignOrRemove" disabled>Submit</button> -->
                         <input type="hidden" id="selectedStudentEmailsInput" name="selectedStudentEmailsInput" value = "">
-                        <form method="POST" action="{{ url_for('main.update_tags') }}" id="updateTagsForm">
+                        <form method="POST" action="{{ url_for('main.update_tags_tasks') }}" id="updateTagsForm">
                             <button type="submit" class="btn btn-success m-1 ms-auto" id="submitAssignOrRemove">Submit</button>
                         </form>
-
-                        <!-- <script>
-                            document.getElementById('updateTagsForm').addEventListener('submit', function(event) {
-                                // Get selected student emails
-                                const selectedEmails = Array.from(document.querySelectorAll('.row-checkbox:checked'))
-                                    .map(checkbox => checkbox.closest('tr').querySelector('td:nth-child(5)').textContent.trim());
-                        
-                                // Set the value of the hidden input field
-                                document.getElementById('selectedStudentEmailsInput').value = selectedEmails.join(',');
-                        
-                                // Optionally, you can prevent form submission if no emails are selected
-                                if (selectedEmails.length === 0) {
-                                    event.preventDefault();
-                                    alert('Please select at least one student.');
-                                }
-                            });
-                        </script> -->
-
-                        <script>
-                            let isSubmitting = false; // Flag to prevent multiple submissions
-
-                            document.getElementById('submitAssignOrRemove').addEventListener('click', function(event) {
-                                if (isSubmitting) return; // Prevent multiple submissions
-                                isSubmitting = true;
-                                event.preventDefault(); // Prevent the default form submission
-
-                                // Get selected student emails
-                                const selectedEmails = Array.from(document.querySelectorAll('.row-checkbox:checked'))
-                                    .map(checkbox => checkbox.closest('tr').querySelector('td:nth-child(5)').textContent.trim());
-                        
-                                // Get the tag name (assuming you have a way to get the tag name, e.g., from a dropdown or input field)
-                                const tagName = document.getElementById('assignOrRemoveItemName').value;
-                        
-                                // Set the value of the hidden input fields
-                                document.getElementById('selectedStudentEmailsInput').value = selectedEmails.join(',');
-                                document.getElementById('assignOrRemoveItemName').value = tagName;
-                        
-                                // Optionally, you can prevent form submission if no emails are selected
-                                if (selectedEmails.length === 0) {
-                                    alert('Please select at least one student.');
-                                    return;
-                                }
-                        
-                                // Prepare the data to be sent
-                                const formData = new FormData();
-                                formData.append('selectedStudentEmailsInput', selectedEmails.join(','));
-                                formData.append('tagName', tagName);
-                        
-                                // Send the AJAX request
-                                fetch("{{ url_for('main.update_tags') }}", {
-                                    method: 'POST',
-                                    body: formData,
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert('Tags updated successfully.');
-                                    } else {
-                                        alert('Failed to update tags.');
-                                    }
-                                    isSubmitting = false; // Reset the flag
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error); // Log the error details
-                                    alert('An error occurred while updating tags.');
-                                    isSubmitting = false; // Reset the flag
-                                });
-                            });
-                        </script>
                     </div>
                 </div>
 
@@ -191,11 +122,6 @@
                 </div>
             </div>
   
-
-
-        
-
-
             <div class="table-responsive">
                 <table class="table table-striped table-bordered table-hover">
                     <thead class="table-dark">
@@ -241,9 +167,11 @@
 
     </content>
 
+    <script> const updateTagsTasksUrl = "{{ url_for('main.update_tags_tasks') }}";</script>
     <script src="../static/adminPageStudentProgress.js"></script>
     <script src="../static/allStudentsFilter.js"></script>
     <script src="../static/filterDropdown.js"></script>
+    <script src="../static/assignRemoveTagsTasks.js"></script>
 
 </body>
 

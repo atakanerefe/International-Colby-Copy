@@ -125,23 +125,37 @@ def add_label():
         'html_class': label_color
     }}), 200
 
-@main_blueprint.route('/admin/updateTags', methods=['POST'])
+@main_blueprint.route('/admin/updateTagsTasks', methods=['POST'])
 @login_required
-def update_tags():
+def update_tags_tasks():
     selected_emails_str = request.form.get('selectedStudentEmailsInput')
-    tag_name = request.form.get('tagName')
-    print(selected_emails_str)
+    item_name = request.form.get('itemName')
+    item_type = request.form.get('itemType')
+    action_type = request.form.get('actionType')
+    print(f"Received data: {selected_emails_str}, Item: {item_name}, Type: {item_type}, Action: {action_type}")
 
-    if selected_emails_str:
+    if selected_emails_str and item_name and item_type and action_type:
         selected_emails = selected_emails_str.split(",")  # Convert back to list
         print("Parsed list of emails:", selected_emails)
+        # Perform the tag/task update logic here
         for email in selected_emails:
             user = User.query.filter_by(email=email).first()
-            tag = Tag.query.filter_by(name=tag_name).first()
-            if user and tag:
-                user.tags.append(tag)
+            if user:
+                if item_type == 'Tag':
+                    tag = Tag.query.filter_by(name=item_name).first()
+                    if tag:
+                        if action_type == 'Assign' and tag not in user.tags:  # Prevent duplicate tag entries
+                            user.tags.append(tag)
+                        elif action_type == 'Remove' and tag in user.tags:  # Remove tag if it exists
+                            user.tags.remove(tag)
+                elif item_type == 'Task':
+                    task = Task.query.filter_by(title=item_name).first()
+                    if task:
+                        if action_type == 'Assign' and task not in user.tasks:  # Prevent duplicate task entries
+                            user.tasks.append(task)
+                        elif action_type == 'Remove' and task in user.tasks:  # Remove task if it exists
+                            user.tasks.remove(task)
         db.session.commit()
-        print("Tags updated successfully.")
         return jsonify({'success': True}), 200
     else:
         print("No data received.")
@@ -227,7 +241,7 @@ def get_tags_for_student():
 def get_tags():
     '''Get all tags from the database and returns as json.'''
     # Fetch all tags
-    tags = Tag.query.all()
+    tags = Tag.query.order_by(Tag.name).all()
 
     if not tags:
         return jsonify({'error': 'Tag not found'}), 404

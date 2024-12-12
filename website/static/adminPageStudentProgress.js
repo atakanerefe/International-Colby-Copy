@@ -17,10 +17,8 @@ function handleTaskSelection() {
 // after selecting a task from admin home page
 // This function fetches students who have the selected task and their progress
 function fetchStudentsNew(taskName) {
-    console.log("we're in :D ")
-    changeTaskName(taskName);
 
-    console.log("we're suoer in :D ")
+    changeTaskName(taskName);
 
     fetch(`/get_students_by_task?task=${taskName}`)
         .then(response => response.json())
@@ -41,7 +39,7 @@ function fetchStudentsNew(taskName) {
                 const studentID = student.id; 
 
                 // TAG STUFF
-                const studentTags = student.tags;
+                const studentTags = student.tags.sort((a, b) => a.name.localeCompare(b.name));
                 const tags_html = studentTags.map(tag => `<span class="badge ${tag.html_class} m-1">${tag.name}</span>`).join('');
 
                 var fullName = student.name; 
