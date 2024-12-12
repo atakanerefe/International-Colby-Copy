@@ -1,3 +1,7 @@
+# The implementation Al Madi and us came up with requires global GOOGLE
+# pylint: disable=global-variable-not-assigned
+'''Uses flask to manage user login, logout, and flow. 
+Uses Google OAuth2 for login.'''
 from flask import Blueprint, render_template, redirect, url_for, session
 from flask import request
 from flask_login import login_user, logout_user
@@ -57,8 +61,8 @@ def user_login(userinfo):
     #     return render_template('name_form.html')
 
     if existing_user.email in admin_emails:
-        return redirect(url_for('main.admin')) 
-    
+        return redirect(url_for('main.admin'))
+
     return redirect(url_for('main.task'))
 
 @auth_blueprint.route('/finish-login', methods = ['POST'])

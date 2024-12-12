@@ -17,7 +17,7 @@
             <!-- <div class="m-auto col-lg-3 text-center card" style="background: #C7D9E0;"> -->
             <div class="d-flex align-items-center" studentName="{{ student.name }}">
                 <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit Task</button>
-                <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.addTask') }}">New Task</a>
+                <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.add_task') }}">New Task</a>
                 <button class="btn btn-primary m-1" id="addLabelButton" data-bs-toggle="modal" data-bs-target="#labelModal">New Label</button>
 
             </div>

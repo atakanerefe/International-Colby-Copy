@@ -21,7 +21,7 @@
                         <!-- Change this to call fetchTasks with a sample email for each task -->
                         <li><a class="dropdown-item" href="#" onclick="fetchStudents('First Year Check In')">First Year Check In</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{url_for ('main.addTask')}}">Create New Task</a></li>
+                        <li><a class="dropdown-item" href="{{url_for ('main.add_task')}}">Create New Task</a></li>
                     </ul>
                 </div>
                 <div class="dropdown">
@@ -29,7 +29,7 @@
                         Task Editing
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" href="{{url_for ('main.addTask')}}">Create New Task</a></li>
+                        <li><a class="dropdown-item" href="{{url_for ('main.add_task')}}">Create New Task</a></li>
                         <li><a class="dropdown-item" href="#">Edit Existing Task</a></li>
                     </ul>
                 </div>
