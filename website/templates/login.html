@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Colby International Office Form Helper</title>
+<head>
+    {% include 'bootstrapStarter.html' %}
+
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark pb-4" style="background: #2463A1;">
+    <div class="container">
+        <a class="navbar-brand" href="{{url_for ('main.home')}}"><img src="../static/images/IntLogo.jpg" width=200 height=70 /></a>
+        <div class="nav-item">
+            <button class="btn">
+                <i class="fa fa-sign-in" aria-hidden="true" style="color: white;"></i>
+                <!--Don't use "i" tag for anything but Font-Awesome -Atakan -->
+                <a style="color: white" href= "{{url_for ('auth.google_login')}}">Log In</a>
+            </button>
+            <button class="btn nav-item">
+                <i class="fa-solid fa-message " style="color: white;"></i>
+            </button>
+        </div>
+    </div>
+</nav>

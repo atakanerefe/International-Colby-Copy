@@ -24,9 +24,9 @@ def login():
     global GOOGLE
     if request.method == 'POST':
         return GOOGLE.authorize(callback=url_for('authorized', _external=True))
-    return 'Hello! Log in with your Google account: <a href="/google-login">Log in</a>'
+    return render_template('login.html')
 
-@auth_blueprint.route('/google-login')
+@auth_blueprint.route('/google_login')
 def google_login():
     '''Redirect to Google login page'''
     global GOOGLE
