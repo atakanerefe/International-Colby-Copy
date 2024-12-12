@@ -322,11 +322,10 @@ def admin_view_student_progress():
     return render_template('adminViewStudentProgress.html', student=student, task=cur_task,
                            subtasks=subtasks_progress, progress_percent=progress_percent,
                            progress_ratio=progress_ratio)
-
 @main_blueprint.route('/admin/addTask', methods=['POST'])
 @login_required
 def add_task_to_database():
-    '''Add a new task to the database. Called when the admin aubmits add task form.'''
+    '''Add a new task to the database and assign it to all students.'''
     # Get form data
     task_name = request.form.get('task_name')
     deadline_str = request.form.get('deadline')
@@ -349,7 +348,7 @@ def add_task_to_database():
     # Create the task
     cur_task = Task(title=task_name, content=f"Task created by {current_user.name}",
                     deadline=deadline)
-    db.session.add(task)
+    db.session.add(cur_task)
     db.session.commit()
 
     # Create subtasks and steps
@@ -371,7 +370,14 @@ def add_task_to_database():
                 db.session.add(step)
         db.session.commit()
 
+    # Assign the task to all users
+    all_users = User.query.all()  # Get all users from the database
+    for user in all_users:
+        user.tasks.append(cur_task)
+    db.session.commit()
+
     return redirect(url_for('main.admin'))
+
 
 
 def add_sample_data():
