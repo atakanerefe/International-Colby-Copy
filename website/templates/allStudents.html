@@ -18,7 +18,7 @@
             <div class="d-flex align-items-center" studentName="{{ student.name }}">
                 <button class="btn btn-secondary m-1" id="editTaskButton" disabled>Edit Task</button>
                 <a class="btn btn-primary m-1" id="addTaskButton" href = "{{ url_for('main.add_task') }}">New Task</a>
-                <button class="btn btn-primary m-1" id="addLabelButton" data-bs-toggle="modal" data-bs-target="#labelModal">New Label</button>
+                <button class="btn btn-primary m-1" id="addLabelButton" data-bs-toggle="modal" data-bs-target="#labelModal">New Tag</button>
 
             </div>
         </div>
@@ -134,8 +134,8 @@
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Email</th>
-                            <th>Labels</th>
-                            <th>Tasks</th>
+                            <th>Tags</th>
+                            <th>Subtasks</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
