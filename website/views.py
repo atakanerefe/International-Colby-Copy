@@ -125,6 +125,27 @@ def add_label():
         'html_class': label_color
     }}), 200
 
+@main_blueprint.route('/admin/updateTags', methods=['POST'])
+@login_required
+def update_tags():
+    selected_emails_str = request.form.get('selectedStudentEmailsInput')
+    tag_name = request.form.get('tagName')
+    print(selected_emails_str)
+
+    if selected_emails_str:
+        selected_emails = selected_emails_str.split(",")  # Convert back to list
+        print("Parsed list of emails:", selected_emails)
+        for email in selected_emails:
+            user = User.query.filter_by(email=email).first()
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if user and tag:
+                user.tags.append(tag)
+        db.session.commit()
+        print("Tags updated successfully.")
+        return jsonify({'success': True}), 200
+    else:
+        print("No data received.")
+        return jsonify({'success': False, 'error': 'No data received'}), 400
 
 @main_blueprint.route('/admin/addTask')
 @login_required
