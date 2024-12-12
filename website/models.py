@@ -20,10 +20,10 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(80), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=True)
     student_id = db.Column(db.Integer, nullable=True)
-    tasks = db.relationship('Task', secondary=user_task_association_table, 
+    tasks = db.relationship('Task', secondary=user_task_association_table,
                             backref=db.backref('users', lazy='dynamic'))
     progress = db.relationship('Progress', backref='user')
-    tags = db.relationship('Tag', secondary=user_tag_association_table, 
+    tags = db.relationship('Tag', secondary=user_tag_association_table,
                            backref=db.backref('users', lazy='dynamic'))
 
     # implement get_id method

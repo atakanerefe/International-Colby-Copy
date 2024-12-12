@@ -1,3 +1,7 @@
+# Pytest too many arguments only for sample data entry
+# pytest: disable=too-many-locals
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
 '''Uses flask to manage user access and flow. 
 Gets database classes from models and databse from website.'''
 from datetime import datetime
@@ -5,7 +9,7 @@ from flask import Blueprint, jsonify, render_template, redirect, url_for
 from flask import request
 from flask_login import login_required, current_user
 from website import db
-from .models import Progress, Subtask, User, Task, Step, Tag 
+from .models import Progress, Subtask, User, Task, Step, Tag
 from .models import user_task_association_table, user_tag_association_table
 
 # Create a blueprint
@@ -20,7 +24,7 @@ admin_emails = [
 
 def get_subtask_status_by_progress(cur_subtask):
     '''Get the status of a subtask based on the progress of the user.'''
-    cur_progress = Progress.query.filter_by(user_id=current_user.id, 
+    cur_progress = Progress.query.filter_by(user_id=current_user.id,
                                             subtask_id=cur_subtask.id).first()
     if cur_progress:
         return 'complete' if cur_progress.complete else 'incomplete'
@@ -48,8 +52,6 @@ def task():
     if not student:
         return "Student not found", 404
     tasks = run_get_tasks_by_email(current_user.email)
-    for task in tasks:
-        print(task["title"])
     return render_template('task.html', tasks=tasks, student=student)
 
 @main_blueprint.route('/subtask/<int:task_id>')
@@ -68,7 +70,7 @@ def subtask(task_id):
 def steps(subtask_id):
     '''Display the steps page for the student.'''
     step_objects = Step.query.filter_by(subtask_id=subtask_id).all()
-    my_steps = [{"id": step.id, "title": step.title, "content": step.content, 
+    my_steps = [{"id": step.id, "title": step.title, "content": step.content,
               "subtask_id": step.subtask_id} for step in step_objects]
     return render_template('steps.html', active_step=1, steps=my_steps)
 
@@ -142,7 +144,8 @@ def get_students_by_task():
         return jsonify({'error': 'Task not found'}), 404
 
     # Fetch all users assigned to this task using the user_task_association_table
-    students = User.query.join(user_task_association_table).join(Task).filter(Task.id == cur_task.id).all()
+    students = User.query.join(user_task_association_table).join(Task)\
+                   .filter(Task.id == cur_task.id).all()
 
     students_data = []
 
@@ -156,7 +159,8 @@ def get_students_by_task():
         # Calculate progress for each student on the subtasks
         for cur_subtask in subtasks:
             # Fetch the progress for the student and subtask
-            cur_progress = Progress.query.filter_by(user_id=student.id, subtask_id=cur_subtask.id).first()
+            cur_progress = Progress.query.filter_by(user_id=student.id,
+                                                    subtask_id=cur_subtask.id).first()
             if cur_progress and cur_progress.complete:
                 completed_subtasks += 1
 
@@ -226,12 +230,13 @@ def get_tasks():
 
 @main_blueprint.route('/get_tasks_by_email')
 def get_tasks_by_email():
-    '''Get all tasks assigned to a student by email. Email is fetched by JS call in task page.'''
+    '''Accepts JS calls, runs run_get_tasks_by_email, and returns the result as json.'''
     email = request.args.get('email')
     return jsonify({'tasks': run_get_tasks_by_email(email)})
 
 def run_get_tasks_by_email(email):
-   # get user by email
+    '''Get all tasks assigned to a student by email. Can be called by python directly'''
+    # get user by email
     user = User.query.filter_by(email=email).first()
 
     if not user:
@@ -246,10 +251,11 @@ def run_get_tasks_by_email(email):
     tasks_data = []
 
     for task_id in task_ids:
-        
+
         # get all subtasks in progress that have task_id
-        subtasks = [progress_entry for progress_entry in cur_progress if progress_entry.task_id == task_id]
-        
+        subtasks = [progress_entry for progress_entry in cur_progress
+                    if progress_entry.task_id == task_id]
+
         # get number of subtasks that are complete from subtasks
         completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
 
@@ -273,7 +279,7 @@ def run_get_tasks_by_email(email):
 
 @main_blueprint.route('/admin/view_student_progress')
 @login_required
-def adminViewStudentProgress():
+def admin_view_student_progress():
     '''Display the progress of a student on a task for the admin.'''
     student_email = request.args.get('email')
     task_name = request.args.get('task_name')
@@ -314,7 +320,7 @@ def adminViewStudentProgress():
     progress_ratio = f"{completed_subtasks} / {total_subtasks}"
 
     return render_template('adminViewStudentProgress.html', student=student, task=cur_task,
-                           subtasks=subtasks_progress, progress_percent=progress_percent, 
+                           subtasks=subtasks_progress, progress_percent=progress_percent,
                            progress_ratio=progress_ratio)
 
 @main_blueprint.route('/admin/addTask', methods=['POST'])
@@ -341,14 +347,14 @@ def add_task_to_database():
     deadline = datetime.strptime(deadline_str, '%Y-%m-%d') if deadline_str else None
 
     # Create the task
-    cur_task = Task(title=task_name, content=f"Task created by {current_user.name}", 
+    cur_task = Task(title=task_name, content=f"Task created by {current_user.name}",
                     deadline=deadline)
     db.session.add(task)
     db.session.commit()
 
     # Create subtasks and steps
     for subtask_index, subtask_title in enumerate(subtask_titles):
-        cur_subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}", 
+        cur_subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}",
                               task_id=cur_task.id)
         db.session.add(cur_subtask)
         db.session.commit()
@@ -421,7 +427,7 @@ def add_sample_data():
         db.session.add(task2)
         db.session.commit()
 
-    existing_users_in_task2 = set(user.id for user in task2.users) 
+    existing_users_in_task2 = set(user.id for user in task2.users)
     # print("task2 existing users: ", existing_users_in_task2)
     user_to_add_task2 = User.query.filter_by(name="Tricia").first()
     # print("Tricia to add: ", user_to_add_task2)
@@ -435,9 +441,9 @@ def add_sample_data():
 
     # Create subtasks and assign them to the task
     subtasks_data = [
-        {"title": "I-20 Signature", "content": 
+        {"title": "I-20 Signature", "content":
          "Go to Aura Moreno's office in Cotter Union 239 to get your I-20 signed."},
-        {"title": "Get US Phone Number", "content": 
+        {"title": "Get US Phone Number", "content":
          "Pick up a SIM card from the Pugh Center or use a free Google Voice number."},
         {"title": "Bla Bla Bla 1", "content": "Bla Bla Bla 1"},
         {"title": "Bla Bla Bla 2", "content": "Bla Bla Bla 2"},
@@ -455,11 +461,11 @@ def add_sample_data():
     subtasks = []
     steps_list = []
     for subtask_data in subtasks_data:
-        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], 
+        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"],
                                               task_id=cur_task.id).first()
 
         if not cur_subtask:
-            cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], 
+            cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"],
                                   task_id=cur_task.id)
             db.session.add(cur_subtask)
             subtasks.append(cur_subtask)
@@ -468,7 +474,7 @@ def add_sample_data():
         for step_data in steps_data:
             step = Step.query.filter_by(title=step_data["title"], subtask_id=cur_subtask.id).first()
             if not step:
-                step = Step(title=step_data["title"], content=step_data["content"], 
+                step = Step(title=step_data["title"], content=step_data["content"],
                             subtask_id=cur_subtask.id, progress=0)
                 db.session.add(step)
                 steps_list.append(step)
@@ -486,12 +492,13 @@ def add_sample_data():
     # For each user, create progress records for their respective subtasks
     for progress_entry in progress_data:
         user = progress_entry["user"]
-        for i, subtask in enumerate(subtasks):
-            cur_progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first()
+        for i, cur_subtask in enumerate(subtasks):
+            cur_progress = Progress.query.filter_by(user_id=user.id,
+                                                    subtask_id=cur_subtask.id).first()
             if not cur_progress:
-                complete = True if i + 1 in progress_entry["subtasks_completed"] else False
-                cur_progress = Progress(complete=complete, user_id=user.id, 
-                                        subtask_id=subtask.id, task_id=cur_task.id)
+                complete = i + 1 in progress_entry["subtasks_completed"]
+                cur_progress = Progress(complete=complete, user_id=user.id,
+                                        subtask_id=cur_subtask.id, task_id=cur_task.id)
                 db.session.add(cur_progress)
     db.session.commit()
 
@@ -511,8 +518,8 @@ def add_sample_data():
         db.session.commit()
 
     # assign to two users
-    existing_users_with_tag1 = set(user.id for user in tag1.users) 
-    existing_users_with_tag2 = set(user.id for user in tag2.users) 
+    existing_users_with_tag1 = set(user.id for user in tag1.users)
+    existing_users_with_tag2 = set(user.id for user in tag2.users)
     # print("task2 existing users: ", existing_users_in_task2)
     user1_to_add_tag1 = User.query.filter_by(name="Tricia").first()
     user2_to_add_tag1 = User.query.filter_by(name="Owen").first()
@@ -536,25 +543,25 @@ def add_sample_data():
             tag2.users.append(user1_to_add_tag2)
             db.session.commit()
 
-            
 def add_task_ssn_application():
+    '''Add a sample task for applying for a Social Security Number and Card.'''
     # Add the main task
-    task = Task.query.filter_by(title="Applying for a Social Security Number and Card").first()
-    if not task:
-        task = Task(
+    cur_task = Task.query.filter_by(title="Applying for a Social Security Number and Card").first()
+    if not cur_task:
+        cur_task = Task(
             title="Applying for a Social Security Number and Card",
             content="Steps and requirements for applying for an SSN.",
             deadline=datetime(2020, 10, 20)  # Replace with the correct date format
         )
-        db.session.add(task)
+        db.session.add(cur_task)
         db.session.commit()
 
-    # Assign the task to the hardcoded user "Owen" 
-    user_owen = User.query.filter_by(name="Owen").first() 
-    if user_owen and user_owen not in task.users: 
-        task.users.append(user_owen) 
+    # Assign the task to the hardcoded user "Owen"
+    user_owen = User.query.filter_by(name="Owen").first()
+    if user_owen and user_owen not in cur_task.users:
+        cur_task.users.append(user_owen)
         db.session.commit()
-    
+
     # Define subtasks
     subtasks_data = [
         {
@@ -574,14 +581,17 @@ def add_task_ssn_application():
     # Add subtasks
     subtasks = []
     for subtask_data in subtasks_data:
-        subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
-        if not subtask:
-            subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], task_id=task.id)
-            db.session.add(subtask)
-            subtasks.append(subtask)
+        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
+        if not cur_subtask:
+            cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"],
+                                  task_id=task.id)
+            db.session.add(cur_subtask)
+            subtasks.append(cur_subtask)
     db.session.commit()
 
     # Define steps for each subtask
+    # Sample data would be very bulky if in pytest format
+    # pylint: disable=all
     steps_data = {
         "Requirements": [
             {"title": "Understanding the Importance of SSN", "content": """As an incoming international student to Colby, you will need to apply for a Social Security Number with the Social Security Administration Office regardless of whether you will be working on campus. 
@@ -613,35 +623,36 @@ def add_task_ssn_application():
             {"title": "Avoiding SSN-Related Scams", "content": """Beware of scam phone calls asking for your SSN or alerting you that yours has been canceled or you owe money or the like. There are many scams that target foreign nationals. If you receive any communications you are unsure about, please let Aura Moreno know and do not provide information to the caller.  In general, the Social Security Administration will never call you and then ask you to provide your Social Security Number over the phone."""}
         ],
     }
+    # pylint: enable=all
 
     # Add steps
-    for subtask in subtasks:
-        subtask_steps = steps_data.get(subtask.title, [])
+    for cur_subtask in subtasks:
+        subtask_steps = steps_data.get(cur_subtask.title, [])
         for step_data in subtask_steps:
-            step = Step.query.filter_by(title=step_data["title"], subtask_id=subtask.id).first()
+            step = Step.query.filter_by(title=step_data["title"], subtask_id=cur_subtask.id).first()
             if not step:
                 step = Step(
                     title=step_data["title"],
                     content=step_data["content"],
-                    subtask_id=subtask.id,
+                    subtask_id=cur_subtask.id,
                     progress=0
                 )
                 db.session.add(step)
     db.session.commit()
-    
-    # Track progress for the user "Owen" on the new task 
-    progress_data = [ 
-                     {"user": user_owen, "subtasks_completed": [1, 2]} # Example: Owen has completed subtasks 1 and 2 
-                     ] 
-    
-    # For each user, create progress records for their respective subtasks 
-    for progress_entry in progress_data: 
-        user = progress_entry["user"] 
-        for i, subtask in enumerate(subtasks): 
-            progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first() 
-            if not progress: 
-                complete = True if (i + 1) in progress_entry["subtasks_completed"] else False 
-                progress = Progress(complete=complete, user_id=user.id, subtask_id=subtask.id, task_id=task.id) 
-                db.session.add(progress) 
-    db.session.commit()
 
+    # Track progress for the user "Owen" on the new task
+    # Example: Owen has completed subtasks 1 and 2
+    progress_data = [{"user": user_owen, "subtasks_completed": [1, 2]}]
+
+    # For each user, create progress records for their respective subtasks
+    for progress_entry in progress_data:
+        user = progress_entry["user"]
+        for i, cur_subtask in enumerate(subtasks):
+            cur_progress = Progress.query.filter_by(user_id=user.id,
+                                                    subtask_id=cur_subtask.id).first()
+            if not progress:
+                complete = i + 1 in progress_entry["subtasks_completed"]
+                cur_progress = Progress(complete=complete, user_id=user.id,
+                                        subtask_id=cur_subtask.id, task_id=cur_task.id)
+                db.session.add(cur_progress)
+    db.session.commit()

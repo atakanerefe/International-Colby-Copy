@@ -1,6 +1,7 @@
+''' Imports the necessary modules for testing models. '''
 from website.models import User, Task, Subtask, Step, Progress, Tag
 
-def test_create_user(test_client, init_database):
+def test_create_user(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a user is queried by email
@@ -11,8 +12,7 @@ def test_create_user(test_client, init_database):
         assert user is not None
         assert user.name == "Test User 1"
 
-
-def test_task_user_relationship(test_client, init_database):
+def test_task_user_relationship(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a task is assigned to a user
@@ -27,8 +27,7 @@ def test_task_user_relationship(test_client, init_database):
         assert task in user.tasks
         assert user in task.users
 
-
-def test_create_subtask(test_client, init_database):
+def test_create_subtask(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a subtask is queried by title
@@ -39,8 +38,7 @@ def test_create_subtask(test_client, init_database):
         assert subtask is not None
         assert subtask.content == "Content for Subtask 1.1"
 
-
-def test_task_subtask_relationship(test_client, init_database):
+def test_task_subtask_relationship(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a subtask is linked to a task
@@ -51,8 +49,7 @@ def test_task_subtask_relationship(test_client, init_database):
         subtask = Subtask.query.filter_by(task_id=task.id).first()
         assert subtask in task.subtasks
 
-
-def test_create_step(test_client, init_database):
+def test_create_step(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a step is queried by title
@@ -63,8 +60,7 @@ def test_create_step(test_client, init_database):
         assert step is not None
         assert step.content == "Content for Step 1.1.1"
 
-
-def test_subtask_step_relationship(test_client, init_database):
+def test_subtask_step_relationship(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a step is linked to a subtask
@@ -75,8 +71,7 @@ def test_subtask_step_relationship(test_client, init_database):
         step = Step.query.filter_by(subtask_id=subtask.id).first()
         assert step in subtask.steps
 
-
-def test_progress_creation(test_client, init_database):
+def test_progress_creation(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN progress is queried
@@ -87,8 +82,7 @@ def test_progress_creation(test_client, init_database):
         assert progress is not None
         assert not progress.complete
 
-
-def test_user_progress_relationship(test_client, init_database):
+def test_user_progress_relationship(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN progress is linked to a user
@@ -99,8 +93,7 @@ def test_user_progress_relationship(test_client, init_database):
         progress = Progress.query.filter_by(user_id=user.id).first()
         assert progress in user.progress
 
-
-def test_create_tag(test_client, init_database):
+def test_create_tag(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a tag is queried by name
@@ -111,8 +104,7 @@ def test_create_tag(test_client, init_database):
         assert tag is not None
         assert tag.html_class == "label-urgent"
 
-
-def test_user_tag_relationship(test_client, init_database):
+def test_user_tag_relationship(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a tag is assigned to a user
@@ -124,8 +116,7 @@ def test_user_tag_relationship(test_client, init_database):
         assert tag in user.tags
         assert user in tag.users
 
-
-def test_update_user_task(test_client, init_database):
+def test_update_user_task(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a task assigned to a user is updated
@@ -141,8 +132,7 @@ def test_update_user_task(test_client, init_database):
         assert task.title == "Updated Task Title"
         assert task in user.tasks
 
-
-def test_remove_user_task(test_client, init_database):
+def test_remove_user_task(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a task is removed from a user
@@ -157,8 +147,7 @@ def test_remove_user_task(test_client, init_database):
 
         assert task not in user.tasks
 
-
-def test_assign_multiple_tags_to_user(test_client, init_database):
+def test_assign_multiple_tags_to_user(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN multiple tags are assigned to a user
@@ -175,7 +164,7 @@ def test_assign_multiple_tags_to_user(test_client, init_database):
         assert tag2 in user.tags
 
 
-def test_progress_task_completion(test_client, init_database):
+def test_progress_task_completion(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a task's progress is marked complete
@@ -187,8 +176,7 @@ def test_progress_task_completion(test_client, init_database):
 
         assert progress.complete is True
 
-
-def test_step_belongs_to_correct_subtask(test_client, init_database):
+def test_step_belongs_to_correct_subtask(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN querying a step
@@ -200,8 +188,7 @@ def test_step_belongs_to_correct_subtask(test_client, init_database):
 
         assert step in subtask.steps
 
-
-def test_subtask_without_steps(test_client, init_database):
+def test_subtask_without_steps(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a subtask without steps is queried
@@ -213,8 +200,7 @@ def test_subtask_without_steps(test_client, init_database):
 
         assert len(subtask.steps) == 0
 
-
-def test_multiple_tasks_per_user(test_client, init_database):
+def test_multiple_tasks_per_user(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN multiple tasks are assigned to a single user
@@ -232,8 +218,7 @@ def test_multiple_tasks_per_user(test_client, init_database):
         assert user in task1.users
         assert user in task2.users
 
-
-def test_remove_task_with_subtasks(test_client, init_database):
+def test_remove_task_with_subtasks(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a task with subtasks is removed
@@ -247,8 +232,7 @@ def test_remove_task_with_subtasks(test_client, init_database):
         assert Task.query.filter_by(title="Task 1").first() is None
         assert Subtask.query.filter_by(task_id=task.id).count() == 0
 
-
-def test_step_progress_accumulation(test_client, init_database):
+def test_step_progress_accumulation(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN all steps under a subtask are completed
@@ -264,8 +248,7 @@ def test_step_progress_accumulation(test_client, init_database):
         total_progress = sum(step.progress for step in steps) / len(steps)
         assert total_progress == 100
 
-
-def test_progress_status_across_tasks(test_client, init_database):
+def test_progress_status_across_tasks(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN querying progress records for a user
@@ -290,7 +273,6 @@ def test_task_without_subtasks_no_db():
     """
     # Create a standalone task object
     task = Task(title="Standalone Task", content="This task has no subtasks.")
-    
+
     # Assert that the task has no subtasks
     assert len(task.subtasks) == 0
-
