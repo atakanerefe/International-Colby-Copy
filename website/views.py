@@ -1,9 +1,9 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, render_template, redirect, url_for
 from flask import request
+from flask_login import login_required, current_user
 from website import db
 from .models import Progress, Subtask, User, Task, Step, Tag, user_task_association_table, user_tag_association_table
-from flask_login import login_required, current_user
-from datetime import datetime
 
 # Create a blueprint
 main_blueprint = Blueprint('main', __name__)
@@ -15,27 +15,23 @@ admin_emails = [
         "obraym25@colby.edu"
     ]
 
-def getSubtaskStatusByProgress(subtask):
-    progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask.id).first()
-    print(progress.id, progress.complete)
-    if progress:
-        return 'complete' if progress.complete else 'incomplete'
+def getSubtaskStatusByProgress(cur_subtask):
+    '''Get the status of a subtask based on the progress of the user.'''
+    cur_progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=cur_subtask.id).first()
+    if cur_progress:
+        return 'complete' if cur_progress.complete else 'incomplete'
     return 'incomplete'
 
 @main_blueprint.route('/', methods=['GET', 'POST'])
 @login_required
-def todo():
-    if request.method == 'POST':
-        task = request.form['task-text']
-        new_task = Task(text=task, status='not-completed', user=current_user)
-        db.session.add(new_task)
-        db.session.commit()
-        
-    return redirect(url_for('main.task'))
+def startup():
+    '''Redirect to the home page upon entering basic site url.'''
+    return redirect(url_for('main.home'))
 
 @main_blueprint.route('/home')
 @login_required
 def home():
+    '''Redirects to the task or admin home page depending on user type.'''
     if current_user.email in admin_emails: # change in future iteration
         return redirect(url_for('main.admin'))
     return redirect(url_for('main.task'))
@@ -43,6 +39,7 @@ def home():
 @main_blueprint.route('/task')
 @login_required
 def task():
+    '''Display the task page for the student.'''
     student = User.query.filter_by(email=current_user.email).first()
     if not student:
         return "Student not found", 404
@@ -52,47 +49,51 @@ def task():
 @main_blueprint.route('/subtask/<int:task_id>')
 @login_required
 def subtask(task_id):
+    '''Display the subtask page for the student.'''
     # get all subtasks for a task
     subtasks = Subtask.query.filter_by(task_id=task_id).all()
     subtask_progress = {}
-    for subtask in subtasks:
-        subtask_progress[subtask] = getSubtaskStatusByProgress(subtask)
+    for my_subtask in subtasks:
+        subtask_progress[my_subtask] = getSubtaskStatusByProgress(my_subtask)
     return render_template('subtask.html', subtasks=subtasks, subtask_progress=subtask_progress)
 
 @main_blueprint.route('/steps/<int:subtask_id>')
 @login_required
 def steps(subtask_id):
+    '''Display the steps page for the student.'''
     step_objects = Step.query.filter_by(subtask_id=subtask_id).all()
-    steps = [{"id": step.id, "title": step.title, "content": step.content, 
+    my_steps = [{"id": step.id, "title": step.title, "content": step.content, 
               "subtask_id": step.subtask_id} for step in step_objects]
-    return render_template('steps.html', active_step=1, steps=steps)
+    return render_template('steps.html', active_step=1, steps=my_steps)
 
 @main_blueprint.route('/progress/<int:subtask_id>')
 @login_required
 def progress(subtask_id):
+    '''Update the progress of the student on a subtask. Called when the student clicks the submit button.'''
     # get the progress object for the user and subtask
-    progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask_id).first()
-    if not progress:
+    cur_progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask_id).first()
+    if not cur_progress:
         return "Progress not found", 404
 
     # update the progress
-    progress.complete = True
+    cur_progress.complete = True
     db.session.commit()
 
-    return redirect(url_for('main.subtask', task_id=progress.task_id))
+    return redirect(url_for('main.subtask', task_id=cur_progress.task_id))
 
 @main_blueprint.route('/admin')
 @login_required
 def admin():
+    '''Display the admin home page (all students page by default).'''
     student = User.query.filter_by(email=current_user.email).first()
     # DYNAMICALLY DISPLAY TASKS FOR FUTURE USE
     return render_template('allStudents.html', tasks=Task.query.all(), student=student)
     # return render_template('allStudents.html')
     
-    
 @main_blueprint.route('/add_label', methods=['POST'])
 @login_required
 def add_label():
+    '''Add a new label to the database. Called when the admin creates a label.'''
     label_name = request.json.get('labelName')
     label_color = request.json.get('labelColor')
 
@@ -119,35 +120,37 @@ def add_label():
 @main_blueprint.route('/admin/addTask')
 @login_required
 def addTask():
+    '''Display the add task page for the admin.'''
     return render_template('addTask.html')
 
 @main_blueprint.route('/get_students_by_task')
 def get_students_by_task():
+    '''Get all students assigned to a task. Task is fetched by JS call in admin page.'''
     task_name = request.args.get('task')
 
     # Fetch the task by its title
-    task = Task.query.filter_by(title=task_name).first()
+    cur_task = Task.query.filter_by(title=task_name).first()
 
-    if not task:
+    if not cur_task:
         return jsonify({'error': 'Task not found'}), 404
 
     # Fetch all users assigned to this task using the user_task_association_table
-    students = User.query.join(user_task_association_table).join(Task).filter(Task.id == task.id).all()
+    students = User.query.join(user_task_association_table).join(Task).filter(Task.id == cur_task.id).all()
 
     students_data = []
 
     for student in students:
         # Get all subtasks for this task
-        subtasks = Subtask.query.filter_by(task_id=task.id).all()
+        subtasks = Subtask.query.filter_by(task_id=cur_task.id).all()
 
         total_subtasks = len(subtasks)
         completed_subtasks = 0
 
         # Calculate progress for each student on the subtasks
-        for subtask in subtasks:
+        for cur_subtask in subtasks:
             # Fetch the progress for the student and subtask
-            progress = Progress.query.filter_by(user_id=student.id, subtask_id=subtask.id).first()
-            if progress and progress.complete:
+            cur_progress = Progress.query.filter_by(user_id=student.id, subtask_id=cur_subtask.id).first()
+            if cur_progress and cur_progress.complete:
                 completed_subtasks += 1
 
         # Calculate the progress percentage
@@ -168,6 +171,7 @@ def get_students_by_task():
 
 @main_blueprint.route('/get_tags_for_student')
 def get_tags_for_student():
+    '''Get all tags assigned to a student. Student is fetched by JS call in admin page.'''
     student_name = request.args.get('student')
 
     # Fetch the student
@@ -185,6 +189,7 @@ def get_tags_for_student():
 
 @main_blueprint.route('/get_tags')
 def get_tags():
+    '''Get all tags from the database and returns as json.'''
     # Fetch all tags
     tags = Tag.query.all()
 
@@ -199,6 +204,7 @@ def get_tags():
 
 @main_blueprint.route('/get_tasks')
 def get_tasks():
+    '''Get all tasks from the database and returns as json.'''
     # Fetch all tasks
     tasks = Task.query.all()
 
@@ -213,11 +219,11 @@ def get_tasks():
 
 @main_blueprint.route('/get_tasks_by_email')
 def get_tasks_by_email():
-
+    '''Get all tasks assigned to a student by email. Email is fetched by JS call in task page.'''
     email = request.args.get('email')
-    return jsonify({'tasks': run_get_tasks_by_email(email, js_call=True)})
+    return jsonify({'tasks': run_get_tasks_by_email(email)})
 
-def run_get_tasks_by_email(email, js_call=False):
+def run_get_tasks_by_email(email):
    # get user by email
     user = User.query.filter_by(email=email).first()
 
@@ -225,17 +231,17 @@ def run_get_tasks_by_email(email, js_call=False):
         return jsonify({'error': 'User not found'}), 404
 
     # get progress intances for the user
-    progress = Progress.query.filter_by(user_id=user.id).all()
+    cur_progress = Progress.query.filter_by(user_id=user.id).all()
 
     # get all unique tasks from task_id column in progress
-    task_ids = set(progress_entry.task_id for progress_entry in progress)
+    task_ids = set(progress_entry.task_id for progress_entry in cur_progress)
 
     tasks_data = []
 
     for task_id in task_ids:
         
         # get all subtasks in progress that have task_id
-        subtasks = [progress_entry for progress_entry in progress if progress_entry.task_id == task_id]
+        subtasks = [progress_entry for progress_entry in cur_progress if progress_entry.task_id == task_id]
         
         # get number of subtasks that are complete from subtasks
         completed_subtasks = sum(1 for subtask in subtasks if subtask.complete)
@@ -243,12 +249,12 @@ def run_get_tasks_by_email(email, js_call=False):
         # calculate progress as a percentage
         progress_percent = (completed_subtasks / len(subtasks)) * 100 if len(subtasks) > 0 else 0
 
-        task = Task.query.filter_by(id=task_id).first()
+        cur_task = Task.query.filter_by(id=task_id).first()
 
         tasks_data.append({
-            'title': task.title,
-            'content': task.content,
-            'id': task.id,
+            'title': cur_task.title,
+            'content': cur_task.content,
+            'id': cur_task.id,
             'progress': {
                 'completed': completed_subtasks,
                 'total': len(subtasks),
@@ -261,6 +267,7 @@ def run_get_tasks_by_email(email, js_call=False):
 @main_blueprint.route('/admin/view_student_progress')
 @login_required
 def adminViewStudentProgress():
+    '''Display the progress of a student on a task for the admin.'''
     student_email = request.args.get('email')
     task_name = request.args.get('task_name')
 
@@ -269,25 +276,25 @@ def adminViewStudentProgress():
     if not student:
         return "Student not found", 404
 
-    task = Task.query.filter_by(title=task_name).first()
-    if not task:
+    cur_task = Task.query.filter_by(title=task_name).first()
+    if not cur_task:
         return "Task not found", 404
 
     # Fetch all subtasks for the task
-    subtasks = Subtask.query.filter_by(task_id=task.id).all()
+    subtasks = Subtask.query.filter_by(task_id=cur_task.id).all()
 
     # Fetch progress for the student
-    progress_data = Progress.query.filter_by(user_id=student.id, task_id=task.id).all()
+    progress_data = Progress.query.filter_by(user_id=student.id, task_id=cur_task.id).all()
 
     # Create a dictionary of progress for fast lookup
     progress_dict = {progress.subtask_id: progress.complete for progress in progress_data}
 
     subtasks_progress = []
-    for subtask in subtasks:
-        status = 'complete' if progress_dict.get(subtask.id, False) else 'incomplete'
+    for cur_subtask in subtasks:
+        status = 'complete' if progress_dict.get(cur_subtask.id, False) else 'incomplete'
         subtasks_progress.append({
-            'subtask': subtask.title,
-            'description': subtask.content,  # Add description here
+            'subtask': cur_subtask.title,
+            'description': cur_subtask.content,  # Add description here
             'status': status
         })
 
@@ -296,14 +303,16 @@ def adminViewStudentProgress():
     total_subtasks = len(subtasks)
     progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
 
-    progress_ratio = f"{completed_subtasks} / {total_subtasks}"  # Show progress as a ratio, e.g., "2 / 5"
+    # Show progress as a ratio, e.g., "2 / 5"
+    progress_ratio = f"{completed_subtasks} / {total_subtasks}"
     
-    return render_template('adminViewStudentProgress.html', student=student, task=task, 
+    return render_template('adminViewStudentProgress.html', student=student, task=cur_task, 
                            subtasks=subtasks_progress, progress_percent=progress_percent, progress_ratio=progress_ratio)
 
 @main_blueprint.route('/admin/addTask', methods=['POST'])
 @login_required
 def addTaskToDatabase():
+    '''Add a new task to the database. Called when the admin aubmits add task form.'''
     # Get form data
     task_name = request.form.get('task_name')
     deadline_str = request.form.get('deadline')
@@ -324,14 +333,14 @@ def addTaskToDatabase():
     deadline = datetime.strptime(deadline_str, '%Y-%m-%d') if deadline_str else None
 
     # Create the task
-    task = Task(title=task_name, content=f"Task created by {current_user.name}", deadline=deadline)
+    cur_task = Task(title=task_name, content=f"Task created by {current_user.name}", deadline=deadline)
     db.session.add(task)
     db.session.commit()
 
     # Create subtasks and steps
     for subtask_index, subtask_title in enumerate(subtask_titles):
-        subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}", task_id=task.id)
-        db.session.add(subtask)
+        cur_subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}", task_id=cur_task.id)
+        db.session.add(cur_subtask)
         db.session.commit()
 
         # Add all steps for the current subtask
@@ -340,7 +349,7 @@ def addTaskToDatabase():
                 step = Step(
                     title=title,
                     content=content,
-                    subtask_id=subtask.id,
+                    subtask_id=cur_subtask.id,
                     progress=0
                 )
                 db.session.add(step)
@@ -350,6 +359,7 @@ def addTaskToDatabase():
 
 
 def add_sample_data():
+    '''Add sample data to the database for testing purposes.'''
     # Create or fetch users
     users_data = [
         "obraym25@colby.edu",
@@ -376,25 +386,22 @@ def add_sample_data():
             users.append(existing_user)
     db.session.commit()
 
-    # Fetch the users dynamically
-    user_ids = [user.id for user in users]
-
     # Create a task (this task can be assigned to multiple users)
-    task = Task.query.filter_by(title="First Year Check In").first()
-    if not task:
-        task = Task(title="First Year Check In", content="This is a sample task.")
-        db.session.add(task)
+    cur_task = Task.query.filter_by(title="First Year Check In").first()
+    if not cur_task:
+        cur_task = Task(title="First Year Check In", content="This is a sample task.")
+        db.session.add(cur_task)
         db.session.commit()
 
     # Check if the user-task association already exists before adding
-    existing_users_in_task = set(user.id for user in task.users)  # Set of user IDs already associated with this task
-    # print("task existing users: ", existing_users_in_task)
+    # Set of user IDs already associated with this task
+    existing_users_in_task = set(user.id for user in cur_task.users)
     users_to_add = [user for user in users if user.id not in existing_users_in_task]
 
     if users_to_add:
         # Add users who are not yet associated with the task
         for user in users_to_add:
-            task.users.append(user)
+            cur_task.users.append(user)
         db.session.commit()
 
     # repeat for task2 =====================================================
@@ -418,8 +425,10 @@ def add_sample_data():
 
     # Create subtasks and assign them to the task
     subtasks_data = [
-        {"title": "I-20 Signature", "content": "Go to Aura Moreno's office in Cotter Union 239 to get your I-20 signed."},
-        {"title": "Get US Phone Number", "content": "Pick up a SIM card from the Pugh Center or use a free Google Voice number."},
+        {"title": "I-20 Signature", "content": 
+         "Go to Aura Moreno's office in Cotter Union 239 to get your I-20 signed."},
+        {"title": "Get US Phone Number", "content": 
+         "Pick up a SIM card from the Pugh Center or use a free Google Voice number."},
         {"title": "Bla Bla Bla 1", "content": "Bla Bla Bla 1"},
         {"title": "Bla Bla Bla 2", "content": "Bla Bla Bla 2"},
         {"title": "Bla Bla Bla 3", "content": "Bla Bla Bla 3"},
@@ -434,43 +443,45 @@ def add_sample_data():
     ]
 
     subtasks = []
-    steps = []
+    steps_list = []
     for subtask_data in subtasks_data:
-        subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
+        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=cur_task.id).first()
 
-        if not subtask:
-            subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], task_id=task.id)
-            db.session.add(subtask)
-            subtasks.append(subtask)
-    
+        if not cur_subtask:
+            cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], 
+                                  task_id=cur_task.id)
+            db.session.add(cur_subtask)
+            subtasks.append(cur_subtask)
+
     for subtask in subtasks:
         for step_data in steps_data:
             step = Step.query.filter_by(title=step_data["title"], subtask_id=subtask.id).first()
             if not step:
-                step = Step(title=step_data["title"], content=step_data["content"], subtask_id=subtask.id, progress=0)
+                step = Step(title=step_data["title"], content=step_data["content"], 
+                            subtask_id=subtask.id, progress=0)
                 db.session.add(step)
-                steps.append(step)
-
-        
+                steps_list.append(step)
+  
     db.session.commit()
 
     # Track progress for each user on the same task
     progress_data = [
-        {"user": users[0], "subtasks_completed": [1, 2, 3]},  # User 1 has completed subtasks 1, 2, 3
-        {"user": users[1], "subtasks_completed": [2, 4]},     # User 2 has completed subtasks 2, 4
-        {"user": users[2], "subtasks_completed": [3, 5]},     # User 3 has completed subtasks 3, 5
-        {"user": users[3], "subtasks_completed": [1, 4, 5]}    # User 4 has completed subtasks 1, 4, 5
+        {"user": users[0], "subtasks_completed": [1, 2, 3]},  # User 1 has completed subtasks 1,2,3
+        {"user": users[1], "subtasks_completed": [2, 4]},     # User 2 has completed subtasks 2,4
+        {"user": users[2], "subtasks_completed": [3, 5]},     # User 3 has completed subtasks 3,5
+        {"user": users[3], "subtasks_completed": [1, 4, 5]}    # User 4 has completed subtasks 1,4,5
     ]
 
     # For each user, create progress records for their respective subtasks
     for progress_entry in progress_data:
         user = progress_entry["user"]
         for i, subtask in enumerate(subtasks):
-            progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first()
-            if not progress:
-                complete = True if (i + 1) in progress_entry["subtasks_completed"] else False
-                progress = Progress(complete=complete, user_id=user.id, subtask_id=subtask.id, task_id=task.id)
-                db.session.add(progress)
+            cur_progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first()
+            if not cur_progress:
+                complete = True if i + 1 in progress_entry["subtasks_completed"] else False
+                cur_progress = Progress(complete=complete, user_id=user.id, 
+                                        subtask_id=subtask.id, task_id=cur_task.id)
+                db.session.add(cur_progress)
     db.session.commit()
 
     # creating tags uniquely =====================================================
@@ -502,12 +513,12 @@ def add_sample_data():
             # Add users who are not yet associated with the task
             tag1.users.append(user1_to_add_tag1)
             db.session.commit()
-    
+
     if user2_to_add_tag1:
         if user2_to_add_tag1.id not in existing_users_with_tag1:
             tag1.users.append(user2_to_add_tag1)
             db.session.commit()
-    
+
     if user1_to_add_tag2:
         if user1_to_add_tag2.id not in existing_users_with_tag2:
             # Add users who are not yet associated with the task
