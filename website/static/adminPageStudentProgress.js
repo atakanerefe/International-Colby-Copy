@@ -39,6 +39,11 @@ function fetchStudentsNew(taskName) {
                 const studentEmail = student.email;
                 const studentProgress = student.progress;
                 const studentID = student.id; 
+
+                // TAG STUFF
+                const studentTags = student.tags;
+                const tags_html = studentTags.map(tag => `<span class="badge ${tag.html_class} m-1">${tag.name}</span>`).join('');
+
                 var fullName = student.name; 
                 if (fullName == null) {
                     fullName = student.email;
@@ -58,8 +63,7 @@ function fetchStudentsNew(taskName) {
                         <td>${firstName}</td>
                         <td>${lastName}</td>
                         <td>${studentEmail}</td>
-                        <td>${lastName}</td>
-                        
+                        <td>${tags_html}</td>                        
                         <td>
                             <a href="/admin/view_student_progress?email=${encodeURIComponent(studentEmail)}&task_name=${encodeURIComponent(taskName)}">${progressText}</a>
                         </td>

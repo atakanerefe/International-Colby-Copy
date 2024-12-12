@@ -167,10 +167,14 @@ def get_students_by_task():
         # Calculate the progress percentage
         progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
 
+        tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == student.id).all()
+        serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
+
         students_data.append({
             'email': student.email,
             'name' : student.name,
             "id": student.student_id,
+            'tags': serialized_tags,
             'progress': {
                 'completed': completed_subtasks,
                 'total': total_subtasks,
@@ -508,46 +512,68 @@ def add_sample_data():
                 db.session.add(cur_progress)
     db.session.commit()
 
-    # creating tags uniquely
-    # TAG 1
-    tag1 = Tag.query.filter_by(name="tag1").first()
-    if not tag1:
-        tag1 = Tag(name="tag1", html_class="bg-warning")
-        db.session.add(tag1)
+    # tags list
+    tags_to_create = []
+
+    # Co'25 tag
+    co25_tag = Tag.query.filter_by(name="Co'25").first()
+    if not co25_tag:
+        co25_tag = Tag(name="Co'25", html_class="bg-warning text-dark")
+        tags_to_create.append(co25_tag)
+
+    # Co'26 tag
+    co26_tag = Tag.query.filter_by(name="Co'26").first()
+    if not co26_tag:
+        co26_tag = Tag(name="Co'26", html_class="bg-success")
+        tags_to_create.append(co26_tag)
+
+    # opt_tag
+    opt_tag = Tag.query.filter_by(name="OPT").first()
+    if not opt_tag:
+        opt_tag = Tag(name="OPT", html_class="bg-primary")
+        tags_to_create.append(opt_tag)
+
+    # cpt_tag
+    cpt_tag = Tag.query.filter_by(name="CPT").first()
+    if not cpt_tag:
+        cpt_tag = Tag(name="CPT", html_class="bg-danger")
+        tags_to_create.append(cpt_tag)
+
+    # committing tags
+    if tags_to_create:
+        db.session.add_all(tags_to_create)
         db.session.commit()
 
-    # TAG 2
-    tag2 = Tag.query.filter_by(name="tag2").first()
-    if not tag2:
-        tag2 = Tag(name="tag2", html_class="bg-warning")
-        db.session.add(tag2)
+    tag_assignments = {
+        "Co'25": ["Yela", "Tricia", "Owen"],
+        "Co'26": ["Atakan"],
+        "CPT": ["Tricia", "Atakan"],
+        "OPT": ["Yela", "Owen"]
+    }
+
+    all_tags = {tag.name: tag for tag in Tag.query.all()}
+    all_users = {user.name: user for user in User.query.all()}
+
+    tags_to_update = {}
+
+    for tag_name, user_names in tag_assignments.items():
+        tag = all_tags.get(tag_name)
+        if tag:
+            existing_user_ids = {user.id for user in tag.users}
+            
+            users_to_add = [
+                all_users[user_name]
+                for user_name in user_names
+                if user_name in all_users and all_users[user_name].id not in existing_user_ids
+            ]
+            
+            if users_to_add:
+                tag.users.extend(users_to_add)
+                tags_to_update[tag_name] = users_to_add
+
+    # committng all tag updates
+    if tags_to_update:
         db.session.commit()
-
-    # assign to two users
-    existing_users_with_tag1 = set(user.id for user in tag1.users)
-    existing_users_with_tag2 = set(user.id for user in tag2.users)
-    # print("task2 existing users: ", existing_users_in_task2)
-    user1_to_add_tag1 = User.query.filter_by(name="Tricia").first()
-    user2_to_add_tag1 = User.query.filter_by(name="Owen").first()
-    user1_to_add_tag2 = User.query.filter_by(name="Tricia").first()
-    # print("Tricia to add: ", user_to_add_task2)
-
-    if user1_to_add_tag1:
-        if user1_to_add_tag1.id not in existing_users_with_tag1:
-            # Add users who are not yet associated with the task
-            tag1.users.append(user1_to_add_tag1)
-            db.session.commit()
-
-    if user2_to_add_tag1:
-        if user2_to_add_tag1.id not in existing_users_with_tag1:
-            tag1.users.append(user2_to_add_tag1)
-            db.session.commit()
-
-    if user1_to_add_tag2:
-        if user1_to_add_tag2.id not in existing_users_with_tag2:
-            # Add users who are not yet associated with the task
-            tag2.users.append(user1_to_add_tag2)
-            db.session.commit()
 
 def add_task_ssn_application():
     '''Add a sample task for applying for a Social Security Number and Card.'''
