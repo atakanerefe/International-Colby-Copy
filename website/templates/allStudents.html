@@ -220,7 +220,7 @@
                             <td>{{ student.name.split(' ')[1] }}</td>
                             <td>{{ student.email }}</td>
                             <td>
-                                {% for tag in student.tags %}
+                                {% for tag in student.tags|sort(attribute='name') %}
                                     <span class="badge {{ tag.html_class }} m-1">{{ tag.name }}</span>
                                 {% endfor %}
                             </td>
