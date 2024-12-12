@@ -1,8 +1,8 @@
+'''Imports the necessary modules for testing.'''
+from datetime import datetime
 import pytest
 from website import create_app, db
 from website.models import User, Task, Subtask, Step, Progress, Tag
-from datetime import datetime
-
 
 @pytest.fixture(scope="module")
 def test_client():
@@ -25,9 +25,9 @@ def test_client():
 
 
 @pytest.fixture(scope="function")
-def init_database(test_client):
+def init_database(testing_client):
     """Initialize the database with test data."""
-    with test_client.application.app_context():
+    with testing_client.application.app_context():
 
         db.session.query(Progress).delete()
         db.session.query(Step).delete()
@@ -60,21 +60,31 @@ def init_database(test_client):
         db.session.commit()
 
         steps = [
-            Step(title="Step 1.1.1", content="Content for Step 1.1.1", progress=0, subtask_id=subtasks_task1[0].id),
-            Step(title="Step 1.1.2", content="Content for Step 1.1.2", progress=50, subtask_id=subtasks_task1[0].id),
-            Step(title="Step 1.2.1", content="Content for Step 1.2.1", progress=25, subtask_id=subtasks_task1[1].id),
-            Step(title="Step 1.3.1", content="Content for Step 1.3.1", progress=75, subtask_id=subtasks_task1[2].id),
-            Step(title="Step 2.1.1", content="Content for Step 2.1.1", progress=30, subtask_id=subtasks_task2[0].id),
-            Step(title="Step 2.2.1", content="Content for Step 2.2.1", progress=60, subtask_id=subtasks_task2[1].id),
+            Step(title="Step 1.1.1", content="Content for Step 1.1.1",
+                 progress=0, subtask_id=subtasks_task1[0].id),
+            Step(title="Step 1.1.2", content="Content for Step 1.1.2",
+                 progress=50, subtask_id=subtasks_task1[0].id),
+            Step(title="Step 1.2.1", content="Content for Step 1.2.1",
+                 progress=25, subtask_id=subtasks_task1[1].id),
+            Step(title="Step 1.3.1", content="Content for Step 1.3.1",
+                 progress=75, subtask_id=subtasks_task1[2].id),
+            Step(title="Step 2.1.1", content="Content for Step 2.1.1",
+                 progress=30, subtask_id=subtasks_task2[0].id),
+            Step(title="Step 2.2.1", content="Content for Step 2.2.1",
+                 progress=60, subtask_id=subtasks_task2[1].id),
         ]
         db.session.add_all(steps)
         db.session.commit()
 
         progress_records = [
-            Progress(complete=False, user_id=user1.id, task_id=task1.id, subtask_id=subtasks_task1[0].id),
-            Progress(complete=True, user_id=user1.id, task_id=task1.id, subtask_id=subtasks_task1[1].id),
-            Progress(complete=False, user_id=user1.id, task_id=task2.id, subtask_id=subtasks_task2[0].id),
-            Progress(complete=True, user_id=user2.id, task_id=task2.id, subtask_id=subtasks_task2[1].id),
+            Progress(complete=False, user_id=user1.id, task_id=task1.id,
+                     subtask_id=subtasks_task1[0].id),
+            Progress(complete=True, user_id=user1.id, task_id=task1.id, 
+                     subtask_id=subtasks_task1[1].id),
+            Progress(complete=False, user_id=user1.id, task_id=task2.id, 
+                     subtask_id=subtasks_task2[0].id),
+            Progress(complete=True, user_id=user2.id, task_id=task2.id, 
+                     subtask_id=subtasks_task2[1].id),
         ]
         db.session.add_all(progress_records)
         db.session.commit()
@@ -91,9 +101,3 @@ def init_database(test_client):
 
     with test_client.application.app_context():
         db.session.rollback()
-
-
-
-
-
-
