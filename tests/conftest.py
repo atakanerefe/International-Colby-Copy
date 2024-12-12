@@ -1,3 +1,5 @@
+# Pylint outer name doesn't understand context of test_client
+# pylint: disable=redefined-outer-name
 '''Imports the necessary modules for testing.'''
 from datetime import datetime
 import pytest
