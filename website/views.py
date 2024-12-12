@@ -518,7 +518,7 @@ def add_sample_data():
     # Co'25 tag
     co25_tag = Tag.query.filter_by(name="Co'25").first()
     if not co25_tag:
-        co25_tag = Tag(name="Co'25", html_class="bg-warning text-dark")
+        co25_tag = Tag(name="Co'25", html_class="bg-warning")
         tags_to_create.append(co25_tag)
 
     # Co'26 tag
