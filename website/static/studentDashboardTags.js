@@ -11,7 +11,7 @@ function fetchTagsForStudent(studentName) {
     fetch(`/get_tags_for_student?student=${studentName}`)
         .then(response => response.json())
         .then(data => {
-            const tags = data.tags;
+            const tags = data.tags.sort((a, b) => a.name.localeCompare(b.name));
             // console.log("tags: ", tags)
 
             // Clear previous tags

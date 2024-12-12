@@ -40,7 +40,7 @@ function fetchOptions(endpoint) {
         .then(response => response.json())
         .then(data => {
             if (data.tags) {
-                return data.tags;
+                return data.tags.sort((a, b) => a.name.localeCompare(b.name));
             } else {
                 console.error('No tags found');
                 return [];
