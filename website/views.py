@@ -513,3 +513,75 @@ def add_sample_data():
             # Add users who are not yet associated with the task
             tag2.users.append(user1_to_add_tag2)
             db.session.commit()
+            
+def add_task_ssn_application():
+    # Add the main task
+    task = Task.query.filter_by(title="Applying for a Social Security Number and Card").first()
+    if not task:
+        task = Task(
+            title="Applying for a Social Security Number and Card",
+            content="Steps and requirements for applying for an SSN.",
+            deadline=datetime(2020, 10, 20)  # Replace with the correct date format
+        )
+        db.session.add(task)
+        db.session.commit()
+
+    # Define subtasks
+    subtasks_data = [
+        {
+            "title": "Requirements",
+            "content": "Understand the prerequisites and importance of a Social Security Number."
+        },
+        {
+            "title": "Applying for SSN",
+            "content": "Documents and steps to apply for an SSN."
+        },
+        {
+            "title": "Once You Receive SSN Card",
+            "content": "Steps to complete after receiving the SSN card."
+        },
+    ]
+
+    # Add subtasks
+    subtasks = []
+    for subtask_data in subtasks_data:
+        subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
+        if not subtask:
+            subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], task_id=task.id)
+            db.session.add(subtask)
+            subtasks.append(subtask)
+    db.session.commit()
+
+    # Define steps for each subtask
+    steps_data = {
+        "Requirements": [
+            {"title": "Understanding the Importance of SSN", "content": "Details about why SSN is needed."},
+            {"title": "Prerequisites for Applying for an SSN", "content": "Ensure SEVIS record is active and meet timing requirements."},
+            {"title": "Logistics to Obtain an SSN", "content": "Use Jitney transportation and check office hours."}
+        ],
+        "Applying for SSN": [
+            {"title": "Required Documents for SSN Application", "content": "List of documents needed for application."},
+            {"title": "Visiting the Social Security Office", "content": "Details about office location and hours."},
+            {"title": "Receiving Your Social Security Card", "content": "Timeline and support contact for receiving the card."}
+        ],
+        "Once You Receive SSN Card": [
+            {"title": "Submitting Your SSN to Colby", "content": "Steps to enter your SSN in Colby’s system."},
+            {"title": "Safeguarding Your SSN", "content": "Tips for keeping your SSN secure."},
+            {"title": "Avoiding SSN-Related Scams", "content": "Awareness and tips to avoid scams."}
+        ],
+    }
+
+    # Add steps
+    for subtask in subtasks:
+        subtask_steps = steps_data.get(subtask.title, [])
+        for step_data in subtask_steps:
+            step = Step.query.filter_by(title=step_data["title"], subtask_id=subtask.id).first()
+            if not step:
+                step = Step(
+                    title=step_data["title"],
+                    content=step_data["content"],
+                    subtask_id=subtask.id,
+                    progress=0
+                )
+                db.session.add(step)
+    db.session.commit()
