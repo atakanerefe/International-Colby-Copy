@@ -79,11 +79,11 @@ def init_database(testing_client):
         progress_records = [
             Progress(complete=False, user_id=user1.id, task_id=task1.id,
                      subtask_id=subtasks_task1[0].id),
-            Progress(complete=True, user_id=user1.id, task_id=task1.id, 
+            Progress(complete=True, user_id=user1.id, task_id=task1.id,
                      subtask_id=subtasks_task1[1].id),
-            Progress(complete=False, user_id=user1.id, task_id=task2.id, 
+            Progress(complete=False, user_id=user1.id, task_id=task2.id,
                      subtask_id=subtasks_task2[0].id),
-            Progress(complete=True, user_id=user2.id, task_id=task2.id, 
+            Progress(complete=True, user_id=user2.id, task_id=task2.id,
                      subtask_id=subtasks_task2[1].id),
         ]
         db.session.add_all(progress_records)

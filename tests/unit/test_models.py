@@ -164,7 +164,7 @@ def test_assign_multiple_tags_to_user(test_client):
         assert tag2 in user.tags
 
 
-def test_progress_task_completion(test_client, init_database):
+def test_progress_task_completion(test_client):
     """
     GIVEN a Flask application configured for testing
     WHEN a task's progress is marked complete

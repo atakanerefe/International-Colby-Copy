@@ -155,7 +155,7 @@ def get_students_by_task():
         # Calculate progress for each student on the subtasks
         for cur_subtask in subtasks:
             # Fetch the progress for the student and subtask
-            cur_progress = Progress.query.filter_by(user_id=student.id, 
+            cur_progress = Progress.query.filter_by(user_id=student.id,
                                                     subtask_id=cur_subtask.id).first()
             if cur_progress and cur_progress.complete:
                 completed_subtasks += 1
@@ -316,7 +316,7 @@ def admin_view_student_progress():
     progress_ratio = f"{completed_subtasks} / {total_subtasks}"
 
     return render_template('adminViewStudentProgress.html', student=student, task=cur_task,
-                           subtasks=subtasks_progress, progress_percent=progress_percent, 
+                           subtasks=subtasks_progress, progress_percent=progress_percent,
                            progress_ratio=progress_ratio)
 
 @main_blueprint.route('/admin/addTask', methods=['POST'])
@@ -437,7 +437,7 @@ def add_sample_data():
 
     # Create subtasks and assign them to the task
     subtasks_data = [
-        {"title": "I-20 Signature", "content": 
+        {"title": "I-20 Signature", "content":
          "Go to Aura Moreno's office in Cotter Union 239 to get your I-20 signed."},
         {"title": "Get US Phone Number", "content":
          "Pick up a SIM card from the Pugh Center or use a free Google Voice number."},
@@ -489,7 +489,8 @@ def add_sample_data():
     for progress_entry in progress_data:
         user = progress_entry["user"]
         for i, cur_subtask in enumerate(subtasks):
-            cur_progress = Progress.query.filter_by(user_id=user.id, subtask_id=cur_subtask.id).first()
+            cur_progress = Progress.query.filter_by(user_id=user.id,
+                                                    subtask_id=cur_subtask.id).first()
             if not cur_progress:
                 complete = True if i + 1 in progress_entry["subtasks_completed"] else False
                 cur_progress = Progress(complete=complete, user_id=user.id,
@@ -538,9 +539,8 @@ def add_sample_data():
             tag2.users.append(user1_to_add_tag2)
             db.session.commit()
 
-            
 def add_task_ssn_application():
-    '''Add sample task for applying for a Social Security Number and Card.'''
+    '''Add a sample task for applying for a Social Security Number and Card.'''
     # Add the main task
     cur_task = Task.query.filter_by(title="Applying for a Social Security Number and Card").first()
     if not cur_task:
@@ -579,15 +579,13 @@ def add_task_ssn_application():
     for subtask_data in subtasks_data:
         cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
         if not cur_subtask:
-            cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], 
-                              task_id=task.id)
+            cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"],
+                                  task_id=task.id)
             db.session.add(cur_subtask)
             subtasks.append(cur_subtask)
     db.session.commit()
 
     # Define steps for each subtask
-    # Adding large content so formatting to pylint would make unreadable
-    # pylint: disable=line-too-long
     steps_data = {
         "Requirements": [
             {"title": "Understanding the Importance of SSN", "content": """As an incoming international student to Colby, you will need to apply for a Social Security Number with the Social Security Administration Office regardless of whether you will be working on campus. 
@@ -619,35 +617,35 @@ def add_task_ssn_application():
             {"title": "Avoiding SSN-Related Scams", "content": """Beware of scam phone calls asking for your SSN or alerting you that yours has been canceled or you owe money or the like. There are many scams that target foreign nationals. If you receive any communications you are unsure about, please let Aura Moreno know and do not provide information to the caller.  In general, the Social Security Administration will never call you and then ask you to provide your Social Security Number over the phone."""}
         ],
     }
-    # pylint: enable=line-too-long
 
     # Add steps
-    for subtask in subtasks:
-        subtask_steps = steps_data.get(subtask.title, [])
+    for cur_subtask in subtasks:
+        subtask_steps = steps_data.get(cur_subtask.title, [])
         for step_data in subtask_steps:
-            step = Step.query.filter_by(title=step_data["title"], subtask_id=subtask.id).first()
+            step = Step.query.filter_by(title=step_data["title"], subtask_id=cur_subtask.id).first()
             if not step:
                 step = Step(
                     title=step_data["title"],
                     content=step_data["content"],
-                    subtask_id=subtask.id,
+                    subtask_id=cur_subtask.id,
                     progress=0
                 )
                 db.session.add(step)
     db.session.commit()
 
-    # Track progress for the user "Owen" on the new task 
-     # Example: Owen has completed subtasks 1 and 2 
+    # Track progress for the user "Owen" on the new task
+    # Example: Owen has completed subtasks 1 and 2
     progress_data = [{"user": user_owen, "subtasks_completed": [1, 2]}]
 
     # For each user, create progress records for their respective subtasks
     for progress_entry in progress_data:
         user = progress_entry["user"]
-        for i, subtask in enumerate(subtasks):
-            progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first()
+        for i, cur_subtask in enumerate(subtasks):
+            cur_progress = Progress.query.filter_by(user_id=user.id, 
+                                                    subtask_id=cur_subtask.id).first()
             if not progress:
-                complete = True if i + 1 in progress_entry["subtasks_completed"] else False
-                progress = Progress(complete=complete, user_id=user.id,
-                                    subtask_id=subtask.id, task_id=task.id)
-                db.session.add(progress)
+                complete = i + 1 in progress_entry["subtasks_completed"]
+                cur_progress = Progress(complete=complete, user_id=user.id,
+                                        subtask_id=cur_subtask.id, task_id=cur_task.id)
+                db.session.add(cur_progress)
     db.session.commit()
