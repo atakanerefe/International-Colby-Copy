@@ -656,7 +656,7 @@ def add_task_ssn_application():
         for i, cur_subtask in enumerate(subtasks):
             cur_progress = Progress.query.filter_by(user_id=user.id,
                                                     subtask_id=cur_subtask.id).first()
-            if not progress:
+            if not cur_progress:
                 complete = i + 1 in progress_entry["subtasks_completed"]
                 cur_progress = Progress(complete=complete, user_id=user.id,
                                         subtask_id=cur_subtask.id, task_id=cur_task.id)
