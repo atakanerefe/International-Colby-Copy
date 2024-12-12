@@ -94,9 +94,13 @@ def progress(subtask_id):
 @login_required
 def admin():
     '''Display the admin home page (all students page by default).'''
-    student = User.query.filter_by(email=current_user.email).first()
+    users = User.query.all()
+    students = []
+    for user in users:
+        if user.email not in admin_emails:
+            students.append(user)
     # DYNAMICALLY DISPLAY TASKS FOR FUTURE USE
-    return render_template('allStudents.html', tasks=Task.query.all(), student=student)
+    return render_template('allStudents.html', students=students)
     # return render_template('allStudents.html')
 
 @main_blueprint.route('/add_label', methods=['POST'])
