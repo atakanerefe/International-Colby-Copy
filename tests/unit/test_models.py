@@ -1,7 +1,9 @@
+# Pylint does not understand init_database function in conftest.py
+# pylint: disable=unused-argument
 ''' Imports the necessary modules for testing models. '''
 from website.models import User, Task, Subtask, Step, Progress, Tag
 
-def test_create_user(test_client):
+def test_create_user(test_client, init_database):
     """
     GIVEN a Flask application configured for testing
     WHEN a user is queried by email
@@ -12,7 +14,7 @@ def test_create_user(test_client):
         assert user is not None
         assert user.name == "Test User 1"
 
-def test_task_user_relationship(test_client):
+def test_task_user_relationship(test_client, init_database):
     """
     GIVEN a Flask application configured for testing
     WHEN a task is assigned to a user
@@ -27,7 +29,7 @@ def test_task_user_relationship(test_client):
         assert task in user.tasks
         assert user in task.users
 
-def test_create_subtask(test_client):
+def test_create_subtask(test_client, init_database):
     """
     GIVEN a Flask application configured for testing
     WHEN a subtask is queried by title
