@@ -51,7 +51,7 @@ def user_login(userinfo):
     email = userinfo['email']
     existing_user = User.query.filter_by(email=email).first()
     print(existing_user)
-    if not existing_user:
+    if not existing_user or existing_user.student_id is None:
         print('no existing user')
         return render_template('name_form.html', email=email)
     login_user(existing_user)
@@ -72,7 +72,12 @@ def finish_login():
         name = request.form['name']
         student_id = request.form['student_id']
         email = request.form['email']
-        new_user = User(name=name, email=email, student_id=student_id)
+        new_user = User.query.filter_by(email=email).first()
+        if not new_user:
+            new_user = User(name=name, email=email, student_id=student_id)
+        else:
+            new_user.name = name
+            new_user.student_id = student_id
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
