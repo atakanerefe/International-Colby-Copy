@@ -1,9 +1,12 @@
+'''Uses flask to manage user access and flow. 
+Gets database classes from models and databse from website.'''
 from datetime import datetime
 from flask import Blueprint, jsonify, render_template, redirect, url_for
 from flask import request
 from flask_login import login_required, current_user
 from website import db
-from .models import Progress, Subtask, User, Task, Step, Tag, user_task_association_table, user_tag_association_table
+from .models import Progress, Subtask, User, Task, Step, Tag 
+from .models import user_task_association_table, user_tag_association_table
 
 # Create a blueprint
 main_blueprint = Blueprint('main', __name__)
@@ -15,9 +18,10 @@ admin_emails = [
         "obraym25@colby.edu"
     ]
 
-def getSubtaskStatusByProgress(cur_subtask):
+def get_subtask_status_by_progress(cur_subtask):
     '''Get the status of a subtask based on the progress of the user.'''
-    cur_progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=cur_subtask.id).first()
+    cur_progress = Progress.query.filter_by(user_id=current_user.id, 
+                                            subtask_id=cur_subtask.id).first()
     if cur_progress:
         return 'complete' if cur_progress.complete else 'incomplete'
     return 'incomplete'
@@ -54,7 +58,7 @@ def subtask(task_id):
     subtasks = Subtask.query.filter_by(task_id=task_id).all()
     subtask_progress = {}
     for my_subtask in subtasks:
-        subtask_progress[my_subtask] = getSubtaskStatusByProgress(my_subtask)
+        subtask_progress[my_subtask] = get_subtask_status_by_progress(my_subtask)
     return render_template('subtask.html', subtasks=subtasks, subtask_progress=subtask_progress)
 
 @main_blueprint.route('/steps/<int:subtask_id>')
@@ -69,7 +73,8 @@ def steps(subtask_id):
 @main_blueprint.route('/progress/<int:subtask_id>')
 @login_required
 def progress(subtask_id):
-    '''Update the progress of the student on a subtask. Called when the student clicks the submit button.'''
+    '''Update the progress of the student on a subtask. 
+    Called when the student clicks the submit button.'''
     # get the progress object for the user and subtask
     cur_progress = Progress.query.filter_by(user_id=current_user.id, subtask_id=subtask_id).first()
     if not cur_progress:
@@ -89,7 +94,7 @@ def admin():
     # DYNAMICALLY DISPLAY TASKS FOR FUTURE USE
     return render_template('allStudents.html', tasks=Task.query.all(), student=student)
     # return render_template('allStudents.html')
-    
+
 @main_blueprint.route('/add_label', methods=['POST'])
 @login_required
 def add_label():
@@ -119,7 +124,7 @@ def add_label():
 
 @main_blueprint.route('/admin/addTask')
 @login_required
-def addTask():
+def add_task():
     '''Display the add task page for the admin.'''
     return render_template('addTask.html')
 
@@ -305,13 +310,14 @@ def adminViewStudentProgress():
 
     # Show progress as a ratio, e.g., "2 / 5"
     progress_ratio = f"{completed_subtasks} / {total_subtasks}"
-    
-    return render_template('adminViewStudentProgress.html', student=student, task=cur_task, 
-                           subtasks=subtasks_progress, progress_percent=progress_percent, progress_ratio=progress_ratio)
+
+    return render_template('adminViewStudentProgress.html', student=student, task=cur_task,
+                           subtasks=subtasks_progress, progress_percent=progress_percent, 
+                           progress_ratio=progress_ratio)
 
 @main_blueprint.route('/admin/addTask', methods=['POST'])
 @login_required
-def addTaskToDatabase():
+def add_task_to_database():
     '''Add a new task to the database. Called when the admin aubmits add task form.'''
     # Get form data
     task_name = request.form.get('task_name')
@@ -333,13 +339,15 @@ def addTaskToDatabase():
     deadline = datetime.strptime(deadline_str, '%Y-%m-%d') if deadline_str else None
 
     # Create the task
-    cur_task = Task(title=task_name, content=f"Task created by {current_user.name}", deadline=deadline)
+    cur_task = Task(title=task_name, content=f"Task created by {current_user.name}", 
+                    deadline=deadline)
     db.session.add(task)
     db.session.commit()
 
     # Create subtasks and steps
     for subtask_index, subtask_title in enumerate(subtask_titles):
-        cur_subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}", task_id=cur_task.id)
+        cur_subtask = Subtask(title=subtask_title, content=f"Subtask for {task_name}", 
+                              task_id=cur_task.id)
         db.session.add(cur_subtask)
         db.session.commit()
 
@@ -404,7 +412,7 @@ def add_sample_data():
             cur_task.users.append(user)
         db.session.commit()
 
-    # repeat for task2 =====================================================
+    # repeat for task2
     task2 = Task.query.filter_by(title="Get Social Security Number").first()
     if not task2:
         task2 = Task(title="Get Social Security Number", content="This is a second sample task.")
@@ -445,7 +453,8 @@ def add_sample_data():
     subtasks = []
     steps_list = []
     for subtask_data in subtasks_data:
-        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=cur_task.id).first()
+        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], 
+                                              task_id=cur_task.id).first()
 
         if not cur_subtask:
             cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], 
@@ -453,15 +462,15 @@ def add_sample_data():
             db.session.add(cur_subtask)
             subtasks.append(cur_subtask)
 
-    for subtask in subtasks:
+    for cur_subtask in subtasks:
         for step_data in steps_data:
-            step = Step.query.filter_by(title=step_data["title"], subtask_id=subtask.id).first()
+            step = Step.query.filter_by(title=step_data["title"], subtask_id=cur_subtask.id).first()
             if not step:
                 step = Step(title=step_data["title"], content=step_data["content"], 
-                            subtask_id=subtask.id, progress=0)
+                            subtask_id=cur_subtask.id, progress=0)
                 db.session.add(step)
                 steps_list.append(step)
-  
+
     db.session.commit()
 
     # Track progress for each user on the same task
@@ -484,7 +493,7 @@ def add_sample_data():
                 db.session.add(cur_progress)
     db.session.commit()
 
-    # creating tags uniquely =====================================================
+    # creating tags uniquely
     # TAG 1
     tag1 = Tag.query.filter_by(name="tag1").first()
     if not tag1:

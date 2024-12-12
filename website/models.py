@@ -1,3 +1,6 @@
+# Our database models do not need methods
+#pylint: disable=too-few-public-methods
+'''Get database from website and user helper from flask'''
 from flask_login import UserMixin
 from website import db
 
@@ -17,9 +20,11 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(80), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=True)
     student_id = db.Column(db.Integer, nullable=True)
-    tasks = db.relationship('Task', secondary=user_task_association_table, backref=db.backref('users', lazy='dynamic'))
+    tasks = db.relationship('Task', secondary=user_task_association_table, 
+                            backref=db.backref('users', lazy='dynamic'))
     progress = db.relationship('Progress', backref='user')
-    tags = db.relationship('Tag', secondary=user_tag_association_table, backref=db.backref('users', lazy='dynamic'))
+    tags = db.relationship('Tag', secondary=user_tag_association_table, 
+                           backref=db.backref('users', lazy='dynamic'))
 
     # implement get_id method
     def get_id(self):
@@ -62,4 +67,3 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     html_class = db.Column(db.String(120), nullable=False)
-    
