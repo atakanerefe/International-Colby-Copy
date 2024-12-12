@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Fetch options based on the selection
         if (selectedValue === 'Task') {
-            // console.log('in selval = task');
             fetchOptions('/get_tasks')
                 .then(tasks => {
                     console.log('Fetched tasks:', tasks);
@@ -22,14 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 
         } else if (selectedValue === 'Tag') {
-            // console.log('in selval = tag');
             fetchOptions('/get_tags')
             .then(tags => {
                 console.log('Fetched tags:', tags);
                 populateDropdown(filterType, selectedValue, tags, '-- Select Tag --');
             })
         } else {
-            // console.log('in selval = else');
             // Clear the second dropdown if no valid selection
             clearDropdown(filterType, '-- Select Task or Tag --');
         }
@@ -38,12 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Function to fetch options dynamically
 function fetchOptions(endpoint) {
-    // console.log('in fetchOptions!!, endpoint: ', endpoint);
     if (endpoint == "/get_tags"){
         return fetch(endpoint)
         .then(response => response.json())
         .then(data => {
-            // console.log('Fetched data:', data);  // Check if 'tags' exists
             if (data.tags) {
                 return data.tags;
             } else {
@@ -60,7 +55,6 @@ function fetchOptions(endpoint) {
         return fetch(endpoint)
         .then(response => response.json())
         .then(data => {
-            // console.log('Fetched data:', data);  // Check if 'tasks' exists
             if (data.tasks) {
                 return data.tasks;
             } else {
@@ -78,7 +72,6 @@ function fetchOptions(endpoint) {
 // Function to populate the dropdown with options
 function populateDropdown(dropdown, dropdownName, options, defaultOptionText) {
     clearDropdown(dropdown, defaultOptionText);
-    // console.log("the dropdown: ", dropdown.id);
 
     options.forEach(option => {
         const optionElement = document.createElement('option');
@@ -109,7 +102,6 @@ function clearDropdown(dropdown, defaultOptionText) {
 
 // Function to populate the taskFilter dropdown
 function populateTaskFilter(taskFilter) {
-    // console.log('in pop task!!');
     fetchOptions('/get_tasks')
         .then(tasks => populateDropdown(taskFilter, taskFilter.id, tasks, '-- Filter by Task --'))
         .catch(error => console.error('Error populating task filter:', error));
@@ -117,11 +109,9 @@ function populateTaskFilter(taskFilter) {
 
 // Function to populate the tagFilter dropdown
 function populateTagFilter(tagFilter) {
-    // console.log('in pop tag!!');
     fetchOptions('/get_tags')
         .then(tags => {
             console.log('Fetched tags populate:', tags);
-            // populateDropdown(filterType, tags, '-- Select Tag --');
             populateDropdown(tagFilter, tagFilter.id, tags, '-- Filter by Tag --')
         })
         .catch(error => console.error('Error populating tag filter:', error));
