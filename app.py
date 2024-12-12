@@ -1,3 +1,4 @@
+'''Imports the create_app function from the website package and runs the application in debug mode.'''
 from website import create_app
 from website.views import add_sample_data, add_task_ssn_application
 

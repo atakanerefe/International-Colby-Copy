@@ -1,10 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, session
 from flask import request
-from flask_oauthlib.client import OAuth
+from flask_login import login_user, logout_user
 from website import db, GOOGLE
 from .models import User
-from flask_login import login_user, login_required, logout_user, current_user
-import os
 
 # Create a blueprint
 auth_blueprint = Blueprint('auth', __name__)
@@ -18,6 +16,7 @@ admin_emails = [
 
 @auth_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
+    '''Login page'''
     global GOOGLE
     if request.method == 'POST':
         return GOOGLE.authorize(callback=url_for('authorized', _external=True))
@@ -25,11 +24,13 @@ def login():
 
 @auth_blueprint.route('/google-login')
 def google_login():
+    '''Redirect to Google login page'''
     global GOOGLE
     return GOOGLE.authorize(callback=url_for('auth.authorized', _external=True))
 
 @auth_blueprint.route('/login/authorized')
 def authorized():
+    '''Callback page after Google login. Calls loginUser() to finish login process.'''
     global GOOGLE
     response = GOOGLE.authorized_response()
     if response is None or response.get('access_token') is None:
@@ -37,14 +38,12 @@ def authorized():
 
     session['google_token'] = (response['access_token'], '')
     me = GOOGLE.get('userinfo')
-    return loginUser(me.data)
+    return user_login(me.data)
     # Here, 'me.data' contains user information.
     # You can perform registration process using this information if needed.
-    if me.data['email'] in admin_emails:
-        return redirect(url_for('main.admin'))
-    return redirect(url_for('main.task'))
 
-def loginUser(userinfo):
+def user_login(userinfo):
+    '''Finish login process. If user is not registered, redirect to name_form.html.'''
     email = userinfo['email']
     existing_user = User.query.filter_by(email=email).first()
     print(existing_user)
@@ -64,7 +63,7 @@ def loginUser(userinfo):
 
 @auth_blueprint.route('/finish-login', methods = ['POST'])
 def finish_login():
-    print('finish login')
+    '''Finish registration process. Add user to database with all information.'''
     if request.method == 'POST':
         name = request.form['name']
         student_id = request.form['student_id']
@@ -78,6 +77,7 @@ def finish_login():
 
 @auth_blueprint.route('/logout')
 def logout():
+    '''Logout page'''
     logout_user()
     session.pop('google_token', None)
     session.clear()
@@ -85,4 +85,5 @@ def logout():
 
 @GOOGLE.tokengetter
 def get_google_oauth_token():
+    '''Get Google token'''
     return session.get('google_token')
