@@ -1,3 +1,7 @@
+# Pytest too many arguments only for sample data entry
+# pytest: disable=too-many-locals
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
 '''Uses flask to manage user access and flow. 
 Gets database classes from models and databse from website.'''
 from datetime import datetime
@@ -492,7 +496,7 @@ def add_sample_data():
             cur_progress = Progress.query.filter_by(user_id=user.id,
                                                     subtask_id=cur_subtask.id).first()
             if not cur_progress:
-                complete = True if i + 1 in progress_entry["subtasks_completed"] else False
+                complete = i + 1 in progress_entry["subtasks_completed"]
                 cur_progress = Progress(complete=complete, user_id=user.id,
                                         subtask_id=cur_subtask.id, task_id=cur_task.id)
                 db.session.add(cur_progress)
@@ -586,6 +590,8 @@ def add_task_ssn_application():
     db.session.commit()
 
     # Define steps for each subtask
+    # Sample data would be very bulky if in pytest format
+    # pylint: disable=all
     steps_data = {
         "Requirements": [
             {"title": "Understanding the Importance of SSN", "content": """As an incoming international student to Colby, you will need to apply for a Social Security Number with the Social Security Administration Office regardless of whether you will be working on campus. 
@@ -617,6 +623,7 @@ def add_task_ssn_application():
             {"title": "Avoiding SSN-Related Scams", "content": """Beware of scam phone calls asking for your SSN or alerting you that yours has been canceled or you owe money or the like. There are many scams that target foreign nationals. If you receive any communications you are unsure about, please let Aura Moreno know and do not provide information to the caller.  In general, the Social Security Administration will never call you and then ask you to provide your Social Security Number over the phone."""}
         ],
     }
+    # pylint: enable=all
 
     # Add steps
     for cur_subtask in subtasks:
@@ -641,7 +648,7 @@ def add_task_ssn_application():
     for progress_entry in progress_data:
         user = progress_entry["user"]
         for i, cur_subtask in enumerate(subtasks):
-            cur_progress = Progress.query.filter_by(user_id=user.id, 
+            cur_progress = Progress.query.filter_by(user_id=user.id,
                                                     subtask_id=cur_subtask.id).first()
             if not progress:
                 complete = i + 1 in progress_entry["subtasks_completed"]
