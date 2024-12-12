@@ -581,10 +581,10 @@ def add_task_ssn_application():
     # Add subtasks
     subtasks = []
     for subtask_data in subtasks_data:
-        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
+        cur_subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=cur_task.id).first()
         if not cur_subtask:
             cur_subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"],
-                                  task_id=task.id)
+                                  task_id=cur_task.id)
             db.session.add(cur_subtask)
             subtasks.append(cur_subtask)
     db.session.commit()
