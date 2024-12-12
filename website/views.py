@@ -44,6 +44,8 @@ def task():
     if not student:
         return "Student not found", 404
     tasks = run_get_tasks_by_email(current_user.email)
+    for task in tasks:
+        print(task["title"])
     return render_template('task.html', tasks=tasks, student=student)
 
 @main_blueprint.route('/subtask/<int:task_id>')
@@ -524,3 +526,113 @@ def add_sample_data():
             # Add users who are not yet associated with the task
             tag2.users.append(user1_to_add_tag2)
             db.session.commit()
+
+            
+def add_task_ssn_application():
+    # Add the main task
+    task = Task.query.filter_by(title="Applying for a Social Security Number and Card").first()
+    if not task:
+        task = Task(
+            title="Applying for a Social Security Number and Card",
+            content="Steps and requirements for applying for an SSN.",
+            deadline=datetime(2020, 10, 20)  # Replace with the correct date format
+        )
+        db.session.add(task)
+        db.session.commit()
+
+    # Assign the task to the hardcoded user "Owen" 
+    user_owen = User.query.filter_by(name="Owen").first() 
+    if user_owen and user_owen not in task.users: 
+        task.users.append(user_owen) 
+        db.session.commit()
+    
+    # Define subtasks
+    subtasks_data = [
+        {
+            "title": "Requirements",
+            "content": "Understand the prerequisites and importance of a Social Security Number."
+        },
+        {
+            "title": "Applying for SSN",
+            "content": "Documents and steps to apply for an SSN."
+        },
+        {
+            "title": "Once You Receive SSN Card",
+            "content": "Steps to complete after receiving the SSN card."
+        },
+    ]
+
+    # Add subtasks
+    subtasks = []
+    for subtask_data in subtasks_data:
+        subtask = Subtask.query.filter_by(title=subtask_data["title"], task_id=task.id).first()
+        if not subtask:
+            subtask = Subtask(title=subtask_data["title"], content=subtask_data["content"], task_id=task.id)
+            db.session.add(subtask)
+            subtasks.append(subtask)
+    db.session.commit()
+
+    # Define steps for each subtask
+    steps_data = {
+        "Requirements": [
+            {"title": "Understanding the Importance of SSN", "content": """As an incoming international student to Colby, you will need to apply for a Social Security Number with the Social Security Administration Office regardless of whether you will be working on campus. 
+            The importance of this number is for Colby to pay you for your on-campus work and to report proper income and tax information to the Internal Revenue Service (IRS) on your behalf. Income can be in the form of two ways: scholarships (both Colby grant and awards) and compensation (from on-campus employment). If you are currently the recipient of a Colby grant, we are not able to post/release your Colby grant to your student account until your Social Security Number is received and entered into our system.
+            """},
+            {"title": "Prerequisites for Applying for an SSN", "content": """Prerequisites for Applying for an SSN
+            Your SEVIS record must be in Active status for at least 2 days before applying for a SSN.  You should also wait at least 10 days after your initial entry to the United States to ensure your information is uploaded into the system.  If you have a record in any other status, you will not be successful in applying for a SSN. 
+            Logistics to obtain a SSN and Social Security Card: 
+            •	We have arranged that you can reach out to Security for the Jitney at 207-859-5530. Please try to organize yourselves so that you go as a group of no more than 7, if you can. 
+            •	We would like to maximize this service. Let them know where you wish to go and the Jitney will transport you there and back. 
+            •	Please make sure you also check the office of hours between making these arrangements.
+            """},
+        ],
+        "Applying for SSN": [
+            {"title": "Required Documents for SSN Application", "content": """Bring the following documents:  
+            Complete and print Application for a Social Security Card form (SS-5).
+            Original passport
+            Form I-94 printed from https://i94.cbp.dhs.gov/I94/#/home
+            Original I-20 form (for F-1 visa holders only)
+            Original DS-2019 form (for J-1 visa holders only)
+            For F-1 or J-1 visa holders: Proof of employment or employment eligibility (see below for details)
+            """},
+            {"title": "Visiting the Social Security Office", "content": """Visit the Social Security Administration Office in Waterville at 14 Colby Street. Office hours Monday through Friday, 9am-4pm."""},
+            {"title": "Receiving Your Social Security Card", "content": """You will receive a Social Security card in the mail approximately one to two weeks after applying for it. If you have questions while waiting to receive your Social Security number, contact the Social Security Administration directly at 800.772.1213."""}
+        ],
+        "Once You Receive SSN Card": [
+            {"title": "Submitting Your SSN to Colby", "content": """F-1 and J-1 Visa Holders: Once you receive your Social Security number, you must use the following link to enter your SSN:https://www.colby.edu/humanresources/wp-content/uploads/sites/170/2022/10/Entering-Government-ID-From-Profile.pdf"""},
+            {"title": "Safeguarding Your SSN", "content": """This is a very private identification document and number and should be kept in a safe place where you won’t lose it. You should only need to provide it to employers, and possibly banks or other official institutions.  We recommend that you not carry it with you in your wallet or purse."""},
+            {"title": "Avoiding SSN-Related Scams", "content": """Beware of scam phone calls asking for your SSN or alerting you that yours has been canceled or you owe money or the like. There are many scams that target foreign nationals. If you receive any communications you are unsure about, please let Aura Moreno know and do not provide information to the caller.  In general, the Social Security Administration will never call you and then ask you to provide your Social Security Number over the phone."""}
+        ],
+    }
+
+    # Add steps
+    for subtask in subtasks:
+        subtask_steps = steps_data.get(subtask.title, [])
+        for step_data in subtask_steps:
+            step = Step.query.filter_by(title=step_data["title"], subtask_id=subtask.id).first()
+            if not step:
+                step = Step(
+                    title=step_data["title"],
+                    content=step_data["content"],
+                    subtask_id=subtask.id,
+                    progress=0
+                )
+                db.session.add(step)
+    db.session.commit()
+    
+    # Track progress for the user "Owen" on the new task 
+    progress_data = [ 
+                     {"user": user_owen, "subtasks_completed": [1, 2]} # Example: Owen has completed subtasks 1 and 2 
+                     ] 
+    
+    # For each user, create progress records for their respective subtasks 
+    for progress_entry in progress_data: 
+        user = progress_entry["user"] 
+        for i, subtask in enumerate(subtasks): 
+            progress = Progress.query.filter_by(user_id=user.id, subtask_id=subtask.id).first() 
+            if not progress: 
+                complete = True if (i + 1) in progress_entry["subtasks_completed"] else False 
+                progress = Progress(complete=complete, user_id=user.id, subtask_id=subtask.id, task_id=task.id) 
+                db.session.add(progress) 
+    db.session.commit()
+
