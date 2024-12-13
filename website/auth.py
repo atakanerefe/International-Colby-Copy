@@ -18,12 +18,10 @@ admin_emails = [
         # "obraym25@colby.edu"
     ]
 
-@auth_blueprint.route('/login', methods=['GET', 'POST'])
+@auth_blueprint.route('/login')
 def login():
     '''Login page'''
     global GOOGLE
-    if request.method == 'POST':
-        return GOOGLE.authorize(callback=url_for('authorized', _external=True))
     return render_template('login.html')
 
 @auth_blueprint.route('/google_login')
@@ -68,19 +66,18 @@ def user_login(userinfo):
 @auth_blueprint.route('/finish-login', methods = ['POST'])
 def finish_login():
     '''Finish registration process. Add user to database with all information.'''
-    if request.method == 'POST':
-        name = request.form['name']
-        student_id = request.form['student_id']
-        email = request.form['email']
-        new_user = User.query.filter_by(email=email).first()
-        if not new_user:
-            new_user = User(name=name, email=email, student_id=student_id)
-        else:
-            new_user.name = name
-            new_user.student_id = student_id
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user)
+    name = request.form['name']
+    student_id = request.form['student_id']
+    email = request.form['email']
+    new_user = User.query.filter_by(email=email).first()
+    if not new_user:
+        new_user = User(name=name, email=email, student_id=student_id)
+    else:
+        new_user.name = name
+        new_user.student_id = student_id
+    db.session.add(new_user)
+    db.session.commit()
+    login_user(new_user)
 
     return redirect(url_for('main.home'))
 
@@ -92,7 +89,7 @@ def logout():
     session.clear()
     return redirect(url_for('auth.login'))
 
-@GOOGLE.tokengetter
-def get_google_oauth_token():
-    '''Get Google token'''
-    return session.get('google_token')
+# @GOOGLE.tokengetter
+# def get_google_oauth_token():
+#     '''Get Google token'''
+#     return session.get('google_token')
