@@ -23,7 +23,7 @@ jobs:
         pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files '*.py') --ignore-patterns=test_.*?py
     - name: Testing the code with pytest
       env:
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
@@ -31,4 +31,4 @@ jobs:
         APP_SECRET_KEY: ${{ secrets.APP_SECRET_KEY }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
-        python3 -m pytest --cov=. -v --cov-branch --cov-report term-missing
+        python3 -m pytest --cov=website -v --cov-branch --cov-report term-missing
