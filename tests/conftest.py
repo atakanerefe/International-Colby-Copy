@@ -1,7 +1,9 @@
-# Pylint outer name doesn't understand context of test_client
+# Pylint outer name/not accessed don't understand context of test_client
 # pylint: disable=redefined-outer-name
+# pylint: disable=unused-argument
 '''Imports the necessary modules for testing.'''
 from datetime import datetime
+import os
 import pytest
 from website import create_app, db
 from website.models import User, Task, Subtask, Step, Progress, Tag
@@ -153,3 +155,27 @@ def logged_in_admin(test_client, init_database):
         sess["_fresh"] = True
 
     yield test_client, admin
+
+####################
+#  Google auth idea
+#  Adapted from Al Madi's Flask-toto code
+####################
+
+# Mocking the google flow object for testing
+class GoogleAuthMockFlow:
+    '''Mock Google OAuth flow class for testing'''
+    def getAuthorizedResponse(self):
+        '''Mock the authorization URL'''
+        return {'access_token': 'test_access_token'}
+
+
+@pytest.fixture(scope='module')
+def google_client():
+    '''Create a test client with a mocked Google OAuth flow'''
+    os.environ['CONFIG_TYPE'] = 'config.TestingConfig'
+    flask_app = create_app()
+
+    flask_app.blueprints['auth'].GOOGLE = GoogleAuthMockFlow()
+
+    with flask_app.test_client() as test_client:
+        yield test_client
