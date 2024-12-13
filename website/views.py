@@ -3,7 +3,9 @@
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-nested-blocks
-# pylint: disable=too-many-local-variables
+# pylint: disable=too-many-locals
+# need duplicate for testing
+# pylint: disable=duplicate-code
 '''Uses flask to manage user access and flow. 
 Gets database classes from models and databse from website.'''
 from datetime import datetime
@@ -206,7 +208,8 @@ def get_students_by_task():
         progress_percent = (completed_subtasks / total_subtasks) * 100 \
                             if total_subtasks > 0 else 0
 
-        tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == student.id).all()
+        tags = Tag.query.join(user_tag_association_table).join(User)\
+                  .filter(User.id == student.id).all()
         serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
 
         students_data.append({

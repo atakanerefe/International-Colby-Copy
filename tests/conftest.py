@@ -1,7 +1,5 @@
 # Pylint outer name/not accessed don't understand context of test_client
-# pylint: disable=redefined-outer-name
-# pylint: disable=unused-argument
-# pylint: disable=too-many-locals
+# pylint: disable=all
 '''Imports the necessary modules for testing.'''
 from datetime import datetime
 import os
