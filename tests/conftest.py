@@ -1,6 +1,7 @@
 # Pylint outer name/not accessed don't understand context of test_client
 # pylint: disable=redefined-outer-name
 # pylint: disable=unused-argument
+# pylint: disable=too-many-locals
 '''Imports the necessary modules for testing.'''
 from datetime import datetime
 import os
@@ -43,7 +44,7 @@ def init_database(test_client):
         db.session.commit()
 
         # Add test users
-        user1 = User(email="test_user1@example.com", name="Test User 1")
+        user1 = User(email="test_user1@example.com", name="Test User 1", student_id=123456)
         user2 = User(email="test_user2@example.com", name="Test User 2")
         admin_user = User(email="mbeltguz@colby.edu", name="Admin User")  # New admin user
 

@@ -2,6 +2,8 @@
 # pytest: disable=too-many-locals
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-nested-blocks
+# pylint: disable=too-many-local-variables
 '''Uses flask to manage user access and flow. 
 Gets database classes from models and databse from website.'''
 from datetime import datetime
@@ -129,38 +131,38 @@ def add_label():
 @main_blueprint.route('/admin/updateTagsTasks', methods=['POST'])
 @login_required
 def update_tags_tasks():
+    '''Update tags and tasks for students. 
+    Called when the admin assigns or removes tags/tasks.'''
     selected_emails_str = request.form.get('selectedStudentEmailsInput')
     item_name = request.form.get('itemName')
     item_type = request.form.get('itemType')
     action_type = request.form.get('actionType')
-    print(f"Received data: {selected_emails_str}, Item: {item_name}, Type: {item_type}, Action: {action_type}")
 
     if selected_emails_str and item_name and item_type and action_type:
-        selected_emails = selected_emails_str.split(",")  # Convert back to list
+        selected_emails = selected_emails_str.split(",")
         print("Parsed list of emails:", selected_emails)
-        # Perform the tag/task update logic here
+
         for email in selected_emails:
             user = User.query.filter_by(email=email).first()
             if user:
                 if item_type == 'Tag':
                     tag = Tag.query.filter_by(name=item_name).first()
                     if tag:
-                        if action_type == 'Assign' and tag not in user.tags:  # Prevent duplicate tag entries
+                        if action_type == 'Assign' and tag not in user.tags:
                             user.tags.append(tag)
-                        elif action_type == 'Remove' and tag in user.tags:  # Remove tag if it exists
+                        elif action_type == 'Remove' and tag in user.tags:
                             user.tags.remove(tag)
                 elif item_type == 'Task':
-                    task = Task.query.filter_by(title=item_name).first()
-                    if task:
-                        if action_type == 'Assign' and task not in user.tasks:  # Prevent duplicate task entries
-                            user.tasks.append(task)
-                        elif action_type == 'Remove' and task in user.tasks:  # Remove task if it exists
-                            user.tasks.remove(task)
+                    my_task = Task.query.filter_by(title=item_name).first()
+                    if my_task:
+                        if action_type == 'Assign' and my_task not in user.tasks:
+                            user.tasks.append(my_task)
+                        elif action_type == 'Remove' and my_task in user.tasks:
+                            user.tasks.remove(my_task)
         db.session.commit()
         return jsonify({'success': True}), 200
-    else:
-        print("No data received.")
-        return jsonify({'success': False, 'error': 'No data received'}), 400
+    print("No data received.")
+    return jsonify({'success': False, 'error': 'No data received'}), 400
 
 @main_blueprint.route('/admin/addTask')
 @login_required
@@ -201,7 +203,8 @@ def get_students_by_task():
                 completed_subtasks += 1
 
         # Calculate the progress percentage
-        progress_percent = (completed_subtasks / total_subtasks) * 100 if total_subtasks > 0 else 0
+        progress_percent = (completed_subtasks / total_subtasks) * 100 \
+                            if total_subtasks > 0 else 0
 
         tags = Tag.query.join(user_tag_association_table).join(User).filter(User.id == student.id).all()
         serialized_tags = [{'name': tag.name, 'html_class': tag.html_class} for tag in tags]
